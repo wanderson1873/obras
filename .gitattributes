@@ -1,0 +1,8 @@
+# O build roda em Linux. CRLF em Dockerfile ou script quebra a execucao la.
+* text=auto eol=lf
+
+# Binarios nao devem ser convertidos.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
