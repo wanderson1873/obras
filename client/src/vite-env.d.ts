@@ -9,3 +9,11 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/** Preenchido por /config.js, gerado pelo container a partir do ambiente. */
+interface Window {
+  __OBRAS_ENV__?: {
+    SUPABASE_URL?: string;
+    SUPABASE_PUBLISHABLE_KEY?: string;
+  };
+}

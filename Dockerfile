@@ -13,18 +13,9 @@ RUN npm ci
 
 COPY . .
 
-# O Vite grava estas variáveis dentro do bundle na hora do build, não em tempo
-# de execução. Por isso elas precisam existir AQUI, como build args.
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_PUBLISHABLE_KEY
-
-# Falhar agora, com mensagem clara, é melhor do que publicar um app que só
-# quebra quando o usuário tenta entrar.
-RUN if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then       echo "ERRO: defina VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY nas variaveis do EasyPanel.";       exit 1;     fi
-
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
-ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
-
+# Sem variáveis do Supabase aqui de propósito. O EasyPanel só repassa GIT_SHA
+# como build arg, então a configuração é lida quando o container sobe, não
+# gravada dentro do bundle. Veja docker-entrypoint.d/10-obras-config.sh.
 RUN npm run build:client
 
 # ---------- Etapa 2: servir ----------
@@ -33,5 +24,10 @@ FROM nginx:1.27-alpine
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/public /usr/share/nginx/html
+
+# A imagem do nginx roda tudo que estiver em /docker-entrypoint.d antes de
+# iniciar o servidor — desde que o arquivo seja executável.
+COPY docker-entrypoint.d/10-obras-config.sh /docker-entrypoint.d/10-obras-config.sh
+RUN chmod +x /docker-entrypoint.d/10-obras-config.sh
 
 EXPOSE 80

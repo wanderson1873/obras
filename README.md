@@ -54,9 +54,13 @@ As duas são **públicas por natureza** — elas vão dentro do JavaScript que r
 navegador de qualquer visitante. Quem protege os dados é o RLS no banco, não o
 sigilo da chave. Nunca coloque aqui a `service_role`.
 
-Como o Vite grava essas variáveis dentro do bundle **na hora do build**, elas
-precisam existir no momento em que a imagem é construída — não adianta só
-definir no container em execução.
+Em desenvolvimento elas vêm do arquivo `.env`, embutidas pelo Vite.
+
+Em produção **não** são embutidas no build: o container gera um `/config.js` a
+partir das variáveis de ambiente toda vez que sobe, e o app lê dali. Isso existe
+porque o EasyPanel só repassa `GIT_SHA` como build arg — variáveis do painel não
+chegam ao `docker build`. O efeito colateral é bom: trocar de projeto Supabase é
+só mudar a variável e reiniciar, sem recompilar.
 
 ## Deploy no EasyPanel
 
@@ -65,12 +69,16 @@ nginx. Não há Node em produção.
 
 1. No EasyPanel, crie um **App** apontando para este repositório do GitHub.
 2. Build: **Dockerfile**.
-3. Em **Environment**, defina `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`.
-   Garanta que o EasyPanel as repasse como **build args** — o build falha de
-   propósito, com mensagem clara, se elas estiverem faltando.
+3. Em **Ambiente**, defina `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`.
+   São lidas quando o container sobe, então basta reiniciar o serviço depois de
+   mudar — não precisa reconstruir a imagem.
 4. Porta do container: **80**.
-5. Em **Domains**, aponte o domínio e ative o HTTPS (Let's Encrypt). Sem
+5. Em **Domínios**, aponte o domínio e ative o HTTPS (Let's Encrypt). Sem
    certificado válido o celular não instala o app.
+
+Se as variáveis estiverem faltando, o app sobe assim mesmo e mostra uma tela
+"Configuração ausente" dizendo exatamente o que definir — e o log do container
+avisa na partida.
 
 Cada push na branch principal dispara um novo build.
 

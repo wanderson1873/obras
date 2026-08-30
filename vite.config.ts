@@ -52,12 +52,24 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
+        // O config.js e reescrito quando o container sobe; guardar a versao do
+        // build no precache serviria a configuracao errada para sempre.
+        globIgnores: ["**/config.js"],
         // O app é uma página só; qualquer rota cai no index.
         navigateFallback: "index.html",
         // Nunca servir chamada de API do cache: dado de obra vem do Supabase ou não vem.
         navigateFallbackDenylist: [/^\/rest\//, /^\/auth\//, /^\/storage\//],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
+          {
+            // Precisa estar em cache para o app abrir sem sinal, mas sempre
+            // revalidado para uma troca no painel chegar rapido.
+            urlPattern: ({ url }) =>
+              url.origin === self.location.origin &&
+              url.pathname === "/config.js",
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "obras-config" },
+          },
           {
             // As fontes precisam estar em cache para o app abrir bonito sem sinal.
             urlPattern: ({ url }) =>

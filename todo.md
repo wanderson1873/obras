@@ -1,3 +1,20 @@
+# Correção: configuração em tempo de execução (30 ago 2026)
+
+O primeiro deploy no EasyPanel falhou. O log mostrou que ele constrói com
+`docker buildx build ... --build-arg 'GIT_SHA=...'` e nada mais: as variáveis
+definidas em Ambiente nunca chegam ao build. Como o Vite embute as variáveis no
+bundle na hora de compilar, o app nunca saberia o endereço do Supabase.
+
+- [x] Container gera /config.js a partir do ambiente ao subir (docker-entrypoint.d).
+- [x] App lê window.__OBRAS_ENV__ e cai no .env do Vite em desenvolvimento.
+- [x] Tirar os build args e o guard do Dockerfile.
+- [x] Manter /config.js fora do precache do service worker — a versão do build
+      serviria a configuração errada para sempre.
+- [x] Cachear /config.js em runtime (stale-while-revalidate) para o app abrir sem sinal.
+- [x] nginx serve /config.js com no-cache.
+- [x] Tela "Configuração ausente" em vez de login que falha em todo clique.
+- [x] Testar o entrypoint com e sem variáveis: gera JavaScript válido nos dois casos.
+
 # Atualização: repositório e deploy (30 ago 2026)
 
 - [x] Publicar o projeto em github.com/wanderson1873/obras.
