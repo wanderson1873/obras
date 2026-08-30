@@ -77,10 +77,22 @@ export function WorkCard({
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-[23px] font-bold leading-tight tracking-[-0.045em] text-[#27374c]">
-              {work.street}
-            </h3>
-            <p className="mt-1 flex items-center gap-1 text-[13px] font-semibold text-[#637084]">
+            <p className="flex items-center gap-1.5 font-mono-field text-[8px] font-medium uppercase tracking-[0.14em] text-[#8a929d]">
+              <KeyRound size={11} className="text-[#e86a33]" /> Código de
+              entrada
+            </p>
+            {work.code ? (
+              <h3 className="mt-0.5 font-mono-field text-[27px] font-medium leading-tight tracking-[0.15em] text-[#27374c]">
+                {work.code}
+              </h3>
+            ) : (
+              // O lugar continua reservado para o olho não ter que reaprender
+              // onde procurar a cada ficha.
+              <p className="mt-1 text-[15px] font-semibold italic text-[#a7aeb8]">
+                sem código
+              </p>
+            )}
+            <p className="mt-1.5 flex items-center gap-1 text-[13px] font-semibold text-[#637084]">
               <MapPin size={13} /> {work.city}
             </p>
             <p className="mt-1 flex items-center gap-1 font-mono-field text-[9px] font-medium uppercase tracking-[0.06em] text-[#8a929d]">
@@ -96,26 +108,23 @@ export function WorkCard({
           )}
         </div>
 
-        {work.code ? (
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-[#f3f0e9] px-3 py-2.5">
-            <div className="flex items-center gap-2">
-              <KeyRound size={15} className="text-[#e86a33]" />
-              <div>
-                <span className="block font-mono-field text-[8px] font-medium uppercase tracking-[0.12em] text-[#788293]">
-                  Entrada
-                </span>
-                <span className="font-mono-field text-[17px] font-medium tracking-[0.13em] text-[#27374c]">
-                  {work.code}
-                </span>
-              </div>
+        {/* O endereço sempre existe, então esta faixa aparece em toda ficha. */}
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-[#f3f0e9] px-3 py-2.5">
+          <div className="flex min-w-0 items-center gap-2">
+            <MapPin size={15} className="shrink-0 text-[#e86a33]" />
+            <div className="min-w-0">
+              <span className="block font-mono-field text-[8px] font-medium uppercase tracking-[0.12em] text-[#788293]">
+                Endereço
+              </span>
+              {/* Duas linhas: endereço com número de apartamento não pode
+                  ser cortado justo na parte que diz onde entrar. */}
+              <span className="line-clamp-2 text-[17px] font-bold leading-tight tracking-[-0.03em] text-[#27374c]">
+                {work.street}
+              </span>
             </div>
-            <RouteButton work={work} onNavigate={onNavigate} />
           </div>
-        ) : (
-          <div className="mt-3">
-            <RouteButton work={work} onNavigate={onNavigate} compact />
-          </div>
-        )}
+          <RouteButton work={work} onNavigate={onNavigate} />
+        </div>
 
         <p className="field-rule mt-3 line-clamp-1 pb-2 text-[13px] font-semibold text-[#5e6979]">
           {work.service}
@@ -139,11 +148,9 @@ export function WorkCard({
 function RouteButton({
   work,
   onNavigate,
-  compact = false,
 }: {
   work: Work;
   onNavigate: () => void;
-  compact?: boolean;
 }) {
   return (
     <button
@@ -152,11 +159,7 @@ function RouteButton({
         onNavigate();
       }}
       aria-label={`Abrir rota para ${work.street}`}
-      className={
-        compact
-          ? "flex h-9 items-center gap-1.5 rounded-xl bg-[#f3f0e9] px-3 text-[12px] font-bold text-[#33465e] transition active:scale-[0.96]"
-          : "flex items-center gap-1 rounded-xl bg-white px-2.5 py-1.5 text-[12px] font-bold text-[#33465e] shadow-sm transition active:scale-[0.96]"
-      }
+      className="flex shrink-0 items-center gap-1 rounded-xl bg-white px-2.5 py-1.5 text-[12px] font-bold text-[#33465e] shadow-sm transition active:scale-[0.96]"
     >
       <Navigation size={14} className="text-[#e86a33]" /> Rota
     </button>

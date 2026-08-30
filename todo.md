@@ -1,3 +1,13 @@
+# Atualização: código em destaque no card (30 ago 2026)
+
+- [x] Trocar endereço e código de lugar: o código vira o destaque do card e o
+      endereço vai para a faixa cinza, junto do botão Rota.
+- [x] A faixa do endereço aparece em toda ficha — endereço sempre existe.
+- [x] Sem código, o destaque mostra "sem código" e a estrutura do card não muda,
+      para o olho não reaprender onde procurar a cada ficha.
+- [x] Endereço longo quebra em duas linhas em vez de cortar o complemento.
+- [x] Conferido em quatro casos: com código, sem código, endereço longo e concluída.
+
 # Atualização: ordem manual das fichas (30 ago 2026)
 
 - [x] Coluna `position` em `works`, com as fichas existentes herdando a ordem da tela.
