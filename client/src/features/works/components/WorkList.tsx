@@ -1,6 +1,7 @@
 /** Tela inicial: busca, abas de status e a pilha de fichas. */
 
 import {
+  ArrowUpDown,
   CloudOff,
   House,
   LogOut,
@@ -29,6 +30,7 @@ export function WorkList({
   onNew,
   onRefresh,
   onSignOut,
+  onOrganize,
 }: {
   works: Work[];
   activeCount: number;
@@ -44,6 +46,7 @@ export function WorkList({
   onNew: () => void;
   onRefresh: () => void;
   onSignOut: () => void;
+  onOrganize: () => void;
 }) {
   return (
     <div className="app-enter min-h-screen px-4 pb-16 pt-7 sm:px-5">
@@ -170,7 +173,15 @@ export function WorkList({
                 : `${works.length} ${works.length === 1 ? "obra" : "obras"}`}
             </h2>
           </div>
-          {tab === "active" && !loading && works.length > 0 && (
+          {!loading && works.length > 1 && (
+            <button
+              onClick={onOrganize}
+              className="flex h-8 items-center gap-1.5 rounded-full bg-[#f3f0e9] px-3 text-[12px] font-bold text-[#4f5c6e] transition active:scale-95"
+            >
+              <ArrowUpDown size={14} className="text-[#e86a33]" /> Organizar
+            </button>
+          )}
+          {tab === "active" && !loading && works.length === 1 && (
             <span className="rounded-full bg-[#f8d1bd] px-2.5 py-1 font-mono-field text-[9px] font-medium tracking-[0.09em] text-[#944120]">
               EM CAMPO
             </span>

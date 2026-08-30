@@ -20,10 +20,14 @@ function newId() {
   return crypto.randomUUID();
 }
 
-/** Em andamento primeiro; dentro de cada grupo, a obra mais recente no topo. */
+/**
+ * Em andamento primeiro; dentro de cada grupo vale a ordem manual escolhida
+ * pelo usuário. A data só desempata quando duas fichas têm a mesma posição.
+ */
 function sortWorks(works: Work[]) {
   return [...works].sort((a, b) => {
     if (a.status !== b.status) return a.status === "active" ? -1 : 1;
+    if (a.position !== b.position) return a.position - b.position;
     return b.startDate.localeCompare(a.startDate);
   });
 }
@@ -122,10 +126,16 @@ export function useWorks() {
 
   const createWork = useCallback(
     (input: WorkInput, firstTask?: string): Work => {
+      // A ficha nova entra no topo: acabou de ser criada, é o que interessa agora.
+      const menorPosicao = worksRef.current.reduce(
+        (menor, item) => Math.min(menor, item.position),
+        0
+      );
       const work: Work = {
         ...input,
         id: newId(),
         status: "active",
+        position: menorPosicao - 1,
         photos: [],
         tasks: firstTask?.trim()
           ? [{ id: newId(), label: firstTask.trim(), done: false }]
@@ -144,6 +154,38 @@ export function useWorks() {
       updateWork(workId, work => ({ ...work, ...input })),
     [updateWork]
   );
+
+  /**
+   * Grava a ordem escolhida no modo organizar. A tela já mostra a lista nova
+   * enquanto salva; se falhar, volta ao que estava e avisa.
+   */
+  const reorderWorks = useCallback(async (orderedIds: string[]) => {
+    const previous = worksRef.current;
+    const posicaoPorId = new Map(orderedIds.map((id, indice) => [id, indice]));
+
+    setWorks(current =>
+      sortWorks(
+        current.map(work =>
+          posicaoPorId.has(work.id)
+            ? { ...work, position: posicaoPorId.get(work.id)! }
+            : work
+        )
+      )
+    );
+
+    try {
+      await repository.reorder(orderedIds);
+      void writeCachedWorks(worksRef.current);
+      return true;
+    } catch (error) {
+      console.error("Falha ao gravar a ordem das obras.", error);
+      setWorks(previous);
+      toast.error("Não foi possível salvar a ordem", {
+        description: errorMessage(error, "A lista voltou ao que estava."),
+      });
+      return false;
+    }
+  }, []);
 
   const removeWork = useCallback(async (workId: string) => {
     const previous = worksRef.current;
@@ -341,6 +383,7 @@ export function useWorks() {
     createWork,
     editWork,
     removeWork,
+    reorderWorks,
     completeWork,
     reopenWork,
     addTask,

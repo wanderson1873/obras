@@ -47,6 +47,8 @@ export type Work = {
   /** ISO YYYY-MM-DD */
   startDate: string;
   status: WorkStatus;
+  /** Ordem manual dentro do grupo (em andamento / concluídas). Menor vem primeiro. */
+  position: number;
   /** ISO YYYY-MM-DD, presente apenas quando status === "completed" */
   completedAt?: string;
   /** A primeira foto é a capa da ficha. */

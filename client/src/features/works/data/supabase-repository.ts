@@ -29,6 +29,7 @@ type WorkRow = {
   start_date: string;
   status: "active" | "completed";
   completed_at: string | null;
+  position: number;
   work_tasks: { id: string; label: string; done: boolean; position: number }[];
   work_updates: { id: string; entry_date: string; text: string }[];
   work_history: { id: string; entry_date: string; title: string }[];
@@ -37,7 +38,7 @@ type WorkRow = {
 
 const SELECT_WORK = `
   id, street, city, zip, code, service, description, observations,
-  water_available, power_available, start_date, status, completed_at,
+  water_available, power_available, start_date, status, completed_at, position,
   work_tasks (id, label, done, position),
   work_updates (id, entry_date, text),
   work_history (id, entry_date, title),
@@ -89,6 +90,7 @@ function toWork(row: WorkRow, signedUrls: Map<string, string>): Work {
     powerAvailable: row.power_available,
     startDate: row.start_date,
     status: row.status,
+    position: row.position,
     completedAt: row.completed_at ?? undefined,
     photos: [...row.work_photos]
       .sort((a, b) => a.position - b.position)
@@ -131,6 +133,7 @@ function toPayload(work: Work) {
     power_available: work.powerAvailable,
     start_date: work.startDate,
     status: work.status,
+    position: work.position,
     // O banco exige completed_at nulo enquanto a obra está em andamento.
     completed_at:
       work.status === "completed" ? (work.completedAt ?? null) : null,
@@ -163,7 +166,7 @@ export const supabaseWorksRepository: WorksRepository = {
     const { data, error } = await supabase
       .from("works")
       .select(SELECT_WORK)
-      .order("start_date", { ascending: false });
+      .order("position", { ascending: true });
 
     if (error) throw error;
 
@@ -179,6 +182,13 @@ export const supabaseWorksRepository: WorksRepository = {
   async save(work) {
     const { error } = await supabase.rpc("save_work", {
       payload: toPayload(work),
+    });
+    if (error) throw error;
+  },
+
+  async reorder(orderedIds) {
+    const { error } = await supabase.rpc("reorder_works", {
+      work_ids: orderedIds,
     });
     if (error) throw error;
   },

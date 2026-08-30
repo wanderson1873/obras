@@ -1,3 +1,15 @@
+# Atualização: ordem manual das fichas (30 ago 2026)
+
+- [x] Coluna `position` em `works`, com as fichas existentes herdando a ordem da tela.
+- [x] Função `reorder_works(uuid[])`: grava a lista inteira em uma chamada, sem
+      deixar a ordem pela metade se a conexão cair.
+- [x] `save_work` preserva a posição quando o app não manda o campo — marcar
+      uma tarefa não pode mover a obra de lugar.
+- [x] Modo organizar: linhas compactas com ↑, ↓ e "ir para o topo".
+- [x] Ficha nova entra no topo da lista.
+- [x] Concluídas continuam depois das em andamento, independentemente da posição.
+- [x] Ordem aplicada na tela na hora e desfeita se a gravação falhar.
+
 # Correção: configuração em tempo de execução (30 ago 2026)
 
 O primeiro deploy no EasyPanel falhou. O log mostrou que ele constrói com

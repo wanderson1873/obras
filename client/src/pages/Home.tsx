@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmSheet } from "@/features/works/components/ConfirmSheet";
 import { NavigationSheet } from "@/features/works/components/NavigationSheet";
+import { ReorderList } from "@/features/works/components/ReorderList";
 import { WorkDetail } from "@/features/works/components/WorkDetail";
 import { WorkFormSheet } from "@/features/works/components/WorkFormSheet";
 import { WorkList } from "@/features/works/components/WorkList";
@@ -23,6 +24,7 @@ export default function Home() {
   const [formState, setFormState] = useState<FormState | null>(null);
   const [navigationWorkId, setNavigationWorkId] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [organizing, setOrganizing] = useState(false);
 
   const byId = (id: string | null) =>
     id ? (works.works.find(work => work.id === id) ?? null) : null;
@@ -82,7 +84,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f7f5f0] text-[#27374c] selection:bg-[#f8d1bd]">
       <main className="relative mx-auto min-h-screen w-full max-w-[540px] border-x border-[#e8e2d7] bg-[#fbfaf7] shadow-[0_0_70px_rgba(39,55,76,0.08)]">
-        {openWork ? (
+        {organizing ? (
+          <ReorderList
+            works={filteredWorks}
+            label={tab === "active" ? "em andamento" : "concluídos"}
+            onSave={works.reorderWorks}
+            onCancel={() => setOrganizing(false)}
+          />
+        ) : openWork ? (
           <WorkDetail
             key={openWork.id}
             work={openWork}
@@ -135,6 +144,7 @@ export default function Home() {
             onSignOut={() => {
               void signOut();
             }}
+            onOrganize={() => setOrganizing(true)}
           />
         )}
       </main>
