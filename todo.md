@@ -1,3 +1,21 @@
+# Atualização: repositório e deploy (30 ago 2026)
+
+- [x] Publicar o projeto em github.com/wanderson1873/obras.
+- [x] Dockerfile de duas etapas: build com Node 24, produção servida por nginx.
+- [x] Configurar cache no nginx: sw.js sempre revalidado, assets com hash eternos.
+- [x] Falhar o build com mensagem clara se faltarem as variáveis do Supabase.
+- [x] Versionar o schema do banco em supabase/migrations.
+- [x] README com instruções de ambiente, scripts e deploy no EasyPanel.
+- [x] .gitattributes forçando LF (CRLF quebraria o Dockerfile no Linux).
+- [x] Remover o pnpm-lock e o patch do wouter, resíduos do Manus.
+- [x] Conferir que .env e .claude ficaram fora do commit.
+
+## Pendente
+- [ ] Criar o App no EasyPanel apontando para o repositório.
+- [ ] Definir VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY como BUILD ARGS.
+- [ ] Apontar o domínio e ativar HTTPS — sem isso o celular não instala o app.
+- [ ] Criar a conta no app depois que estiver no ar.
+
 # Atualização: PWA instalável (30 ago 2026)
 
 - [x] Gerar os ícones PNG 192, 512, maskable 512 e apple-touch 180.
