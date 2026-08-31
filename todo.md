@@ -1,3 +1,19 @@
+# Atualização: entrar com o Google (31 ago 2026)
+
+- [x] Botão "Entrar com o Google" na tela de entrada, com o logotipo da marca.
+- [x] `signInWithGoogle` no contexto de autenticação, voltando para a origem atual
+      (funciona igual em produção e no localhost).
+- [x] Ler o motivo do erro que o Google devolve na URL — sem isso o usuário só
+      veria a tela de entrada de novo, sem entender por quê.
+- [x] Documentar no README o que configurar no Google Cloud e no Supabase.
+- [x] Confirmado que a URL montada pelo app está certa: o Supabase responde
+      "provider is not enabled", ou seja, falta só habilitar no painel.
+
+## Pendente (depende das suas contas)
+- [ ] Criar as credenciais OAuth no Google Cloud e PUBLICAR a tela de
+      consentimento — em modo "Teste" a sessão expira a cada 7 dias.
+- [ ] Habilitar o Google no Supabase e ajustar Site URL / Redirect URLs.
+
 # Atualização: conta, 404 e condições do local (30 ago 2026)
 
 ## Correção do 404 após o login

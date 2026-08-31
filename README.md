@@ -87,6 +87,49 @@ Cada push na branch principal dispara um novo build.
 Abra o domínio no celular. No Android aparece o convite "Instalar o Obras no
 celular"; no iPhone, use Safari → Compartilhar → Adicionar à Tela de Início.
 
+## Entrar com o Google
+
+O botão já está no app. Para ele funcionar, faltam duas configurações que
+dependem das suas contas.
+
+### 1. Google Cloud Console
+
+1. Em [console.cloud.google.com](https://console.cloud.google.com), crie ou
+   selecione um projeto.
+2. **APIs e Serviços → Tela de consentimento OAuth**: tipo **Externo**, nome do
+   app "Obras", seu e-mail em suporte e em contato do desenvolvedor.
+3. Ainda na tela de consentimento, clique em **Publicar app**. Isto importa: no
+   modo "Teste" o Google expira a sessão a cada 7 dias e você teria que entrar de
+   novo toda semana. Como o app só pede nome e e-mail, publicar não exige
+   verificação do Google.
+4. **Credenciais → Criar credenciais → ID do cliente OAuth → Aplicativo da Web**:
+   - Origens JavaScript autorizadas: `https://obras.derson.cloud`
+   - URIs de redirecionamento autorizados:
+     `https://pxujwpvjsnsfpbzzwjhv.supabase.co/auth/v1/callback`
+5. Copie o **ID do cliente** e a **Chave secreta**.
+
+### 2. Supabase
+
+1. **Authentication → Sign In / Providers → Google**: ative e cole o ID do
+   cliente e a chave secreta.
+2. **Authentication → URL Configuration**:
+   - Site URL: `https://obras.derson.cloud`
+   - Redirect URLs: `https://obras.derson.cloud/**` (e
+     `http://localhost:5173/**` para desenvolvimento)
+
+Para conferir se ficou de pé, abra no navegador:
+
+```
+https://pxujwpvjsnsfpbzzwjhv.supabase.co/auth/v1/authorize?provider=google&redirect_to=https%3A%2F%2Fobras.derson.cloud
+```
+
+Enquanto não estiver configurado, isso responde
+`Unsupported provider: provider is not enabled`. Depois, leva para a tela de
+escolher a conta do Google.
+
+Entrar pelo Google e entrar por e-mail com o mesmo endereço caem na mesma conta,
+então as obras são as mesmas nos dois caminhos.
+
 ## Banco de dados
 
 O schema está versionado em `supabase/migrations/`. Para recriar em um projeto

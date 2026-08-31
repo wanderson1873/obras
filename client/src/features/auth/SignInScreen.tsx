@@ -1,9 +1,10 @@
 /** Tela de entrada. Aparece só até existir uma sessão salva no aparelho. */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { House, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
+import { GoogleButton } from "./GoogleButton";
 
 type Mode = "signIn" | "signUp";
 
@@ -31,6 +32,18 @@ export function SignInScreen() {
   const [sendingReset, setSendingReset] = useState(false);
 
   const isSignUp = mode === "signUp";
+
+  useEffect(() => {
+    // Quando o Google recusa, o navegador volta com o motivo na URL. Sem ler
+    // isso o usuário só veria a tela de entrada de novo, sem entender por quê.
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const query = new URLSearchParams(window.location.search);
+    const motivo =
+      hash.get("error_description") ?? query.get("error_description");
+    if (!motivo) return;
+    setError(readableError(decodeURIComponent(motivo.replace(/\+/g, " "))));
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -110,6 +123,16 @@ export function SignInScreen() {
             ? "Crie sua conta para guardar as fichas e abrir de qualquer aparelho."
             : "Entre uma vez — o aparelho guarda a sessão e o app abre direto nas obras."}
         </p>
+
+        <GoogleButton onError={setError} />
+
+        <div className="my-5 flex items-center gap-3">
+          <span className="h-px flex-1 bg-[#e6e0d6]" />
+          <span className="font-mono-field text-[9px] uppercase tracking-[0.16em] text-[#9aa2ac]">
+            ou com e-mail
+          </span>
+          <span className="h-px flex-1 bg-[#e6e0d6]" />
+        </div>
 
         <form onSubmit={submit} className="space-y-4">
           <label className="block">

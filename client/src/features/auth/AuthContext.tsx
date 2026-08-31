@@ -21,6 +21,8 @@ type AuthValue = {
   /** true enquanto ainda não sabemos se existe uma sessão salva. */
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  /** Manda o navegador para o Google e volta autenticado. */
+  signInWithGoogle: () => Promise<void>;
   signUp: (
     email: string,
     password: string
@@ -76,6 +78,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
+        });
+        if (error) throw error;
+      },
+
+      async signInWithGoogle() {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            // Volta para a origem atual: funciona igual em produção e no
+            // localhost, sem precisar de configuração por ambiente.
+            redirectTo: window.location.origin,
+          },
         });
         if (error) throw error;
       },
