@@ -1,13 +1,27 @@
 /** Conta: mostra o e-mail cadastrado, troca a senha e permite sair. */
 
 import { useState } from "react";
-import { Check, KeyRound, Loader2, LogOut, Mail } from "lucide-react";
+import {
+  Building2,
+  Check,
+  ChevronRight,
+  KeyRound,
+  Loader2,
+  LogOut,
+  Mail,
+} from "lucide-react";
 import { toast } from "sonner";
 import { BottomSheet } from "@/features/works/components/BottomSheet";
 import { formatLongDate } from "@/lib/dates";
 import { useAuth } from "./AuthContext";
 
-export function AccountSheet({ onClose }: { onClose: () => void }) {
+export function AccountSheet({
+  onClose,
+  onOpenTeam,
+}: {
+  onClose: () => void;
+  onOpenTeam: () => void;
+}) {
   const { session, updatePassword, signOut } = useAuth();
   const [changing, setChanging] = useState(false);
 
@@ -36,6 +50,19 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
             </p>
           )}
         </div>
+
+        <button
+          onClick={onOpenTeam}
+          className="flex h-12 w-full items-center gap-3 rounded-2xl border border-[#e8e2d7] bg-white px-3.5 text-left transition active:scale-[0.98]"
+        >
+          <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#f3f0e9] text-[#e86a33]">
+            <Building2 size={15} />
+          </span>
+          <span className="flex-1 text-sm font-bold text-[#354357]">
+            Equipe
+          </span>
+          <ChevronRight size={17} className="text-[#b3bac3]" />
+        </button>
 
         {changing ? (
           <ChangePasswordForm

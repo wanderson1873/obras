@@ -12,7 +12,8 @@ import { todayIso } from "@/lib/dates";
 import { readCachedWorks, writeCachedWorks } from "./data/cache";
 import { supabaseWorksRepository } from "./data/supabase-repository";
 import type { WorksRepository } from "./data/repository";
-import type { Photo, Work, WorkInput } from "./types";
+import { useAuth } from "@/features/auth/AuthContext";
+import type { Photo, ShareScope, Work, WorkInput } from "./types";
 
 const repository: WorksRepository = supabaseWorksRepository;
 
@@ -36,7 +37,9 @@ function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
-export function useWorks() {
+export function useWorks(companyId: string | null) {
+  const { session } = useAuth();
+  const myId = session?.user.id ?? "";
   const [works, setWorks] = useState<Work[]>([]);
   const [loading, setLoading] = useState(true);
   /** true quando o Supabase não respondeu e a tela está vindo do cache. */
@@ -134,6 +137,10 @@ export function useWorks() {
       const work: Work = {
         ...input,
         id: newId(),
+        ownerId: myId,
+        companyId,
+        shareScope: "private",
+        sharedWith: [],
         status: "active",
         position: menorPosicao - 1,
         photos: [],
@@ -146,7 +153,7 @@ export function useWorks() {
       void persist(work);
       return work;
     },
-    [persist]
+    [persist, myId, companyId]
   );
 
   const editWork = useCallback(
@@ -186,6 +193,40 @@ export function useWorks() {
       return false;
     }
   }, []);
+
+  /** Trocar quem enxerga passa por uma função própria no banco, não pelo save. */
+  const setSharing = useCallback(
+    async (workId: string, scope: ShareScope, userIds: string[]) => {
+      const previous = worksRef.current;
+      setWorks(current =>
+        current.map(work =>
+          work.id === workId
+            ? { ...work, shareScope: scope, sharedWith: userIds }
+            : work
+        )
+      );
+      try {
+        await repository.setSharing(workId, scope, userIds);
+        void writeCachedWorks(worksRef.current);
+        toast.success(
+          scope === "private"
+            ? "Obra voltou a ser só sua"
+            : scope === "company"
+              ? "Obra compartilhada com a equipe"
+              : "Obra compartilhada"
+        );
+        return true;
+      } catch (error) {
+        console.error("Falha ao mudar o compartilhamento.", error);
+        setWorks(previous);
+        toast.error("Não foi possível mudar quem enxerga", {
+          description: errorMessage(error, "Nada foi alterado."),
+        });
+        return false;
+      }
+    },
+    []
+  );
 
   const removeWork = useCallback(async (workId: string) => {
     const previous = worksRef.current;
@@ -384,6 +425,8 @@ export function useWorks() {
     editWork,
     removeWork,
     reorderWorks,
+    setSharing,
+    myId,
     completeWork,
     reopenWork,
     addTask,

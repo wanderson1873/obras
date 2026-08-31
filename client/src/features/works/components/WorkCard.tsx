@@ -1,6 +1,7 @@
 /** Ficha da lista: foto de fachada, endereço, código de entrada e rota em um toque. */
 
 import {
+  Building2,
   CalendarDays,
   CheckCircle2,
   Droplets,
@@ -8,6 +9,8 @@ import {
   KeyRound,
   MapPin,
   Navigation,
+  Share2,
+  UserRound,
   Zap,
 } from "lucide-react";
 import { formatDuration, formatShortDate } from "@/lib/dates";
@@ -16,11 +19,14 @@ import type { Work } from "@/features/works/types";
 export function WorkCard({
   work,
   index,
+  isMine,
   onOpen,
   onNavigate,
 }: {
   work: Work;
   index: number;
+  /** false quando a obra chegou compartilhada por outra pessoa. */
+  isMine: boolean;
   onOpen: () => void;
   onNavigate: () => void;
 }) {
@@ -142,6 +148,25 @@ export function WorkCard({
             available={work.powerAvailable}
             label="energia"
           />
+          {!isMine && (
+            <ShareChip
+              icon={<UserRound size={12} />}
+              label="Compartilhada comigo"
+            />
+          )}
+          {isMine && work.shareScope === "company" && (
+            <ShareChip icon={<Building2 size={12} />} label="Toda a equipe" />
+          )}
+          {isMine && work.shareScope === "selected" && (
+            <ShareChip
+              icon={<Share2 size={12} />}
+              label={
+                work.sharedWith.length === 1
+                  ? "Compartilhada"
+                  : `Compartilhada · ${work.sharedWith.length}`
+              }
+            />
+          )}
         </div>
       </div>
     </article>
@@ -166,6 +191,14 @@ function RouteButton({
     >
       <Navigation size={14} className="text-[#e86a33]" /> Rota
     </button>
+  );
+}
+
+function ShareChip({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-[#eef3fb] px-2 py-1 font-mono-field text-[9px] font-medium uppercase tracking-[0.06em] text-[#456486]">
+      {icon} {label}
+    </span>
   );
 }
 

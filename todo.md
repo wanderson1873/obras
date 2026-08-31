@@ -21,12 +21,13 @@ Quem recebe uma obra pode editar tudo nela, mas não apagar nem mudar quem vê.
 - [x] Testado que quem recebe edita o conteúdo mas é barrado ao tentar mudar o
       compartilhamento, roubar a obra ou apagá-la.
 
-## Interface (ainda não feita)
-- [ ] Criar a empresa e convidar por e-mail.
-- [ ] Tela de membros da equipe.
-- [ ] Escolher o compartilhamento ao criar e editar a ficha.
-- [ ] Mostrar no card quem compartilhou a obra comigo.
-- [ ] Aceitar convite pendente ao entrar.
+## Interface (pronta)
+- [x] Criar a empresa e convidar por e-mail, em Conta > Equipe.
+- [x] Lista de membros, com remover e cancelar convite (só administrador).
+- [x] Folha "Quem enxerga" na ficha aberta, só para quem criou.
+- [x] Selo no card: compartilhada comigo, toda a equipe, ou com N pessoas.
+- [x] Apagar ficha some para quem apenas recebeu a obra.
+- [x] Convite pendente é aceito sozinho quando a pessoa entra.
 
 ## Pendências fora do código
 - [ ] Dhiego e Espano precisam criar conta no app.

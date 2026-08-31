@@ -31,6 +31,7 @@ export function WorkList({
   onRefresh,
   onAccount,
   onOrganize,
+  myId,
 }: {
   works: Work[];
   activeCount: number;
@@ -47,6 +48,8 @@ export function WorkList({
   onRefresh: () => void;
   onAccount: () => void;
   onOrganize: () => void;
+  /** Id de quem está usando o app, para marcar as obras de outra pessoa. */
+  myId: string;
 }) {
   return (
     <div className="app-enter min-h-screen px-4 pb-16 pt-7 sm:px-5">
@@ -192,6 +195,7 @@ export function WorkList({
                 key={work.id}
                 work={work}
                 index={index}
+                isMine={work.ownerId === myId}
                 onOpen={() => onOpen(work)}
                 onNavigate={() => onNavigate(work)}
               />

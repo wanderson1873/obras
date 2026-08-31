@@ -6,7 +6,7 @@
  * código quando o celular estiver sem sinal na obra.
  */
 
-import type { Photo, Work } from "@/features/works/types";
+import type { Photo, ShareScope, Work } from "@/features/works/types";
 
 export interface WorksRepository {
   list(): Promise<Work[]>;
@@ -15,6 +15,12 @@ export interface WorksRepository {
   remove(id: string): Promise<void>;
   /** Grava a ordem manual da lista inteira em uma chamada só. */
   reorder(orderedIds: string[]): Promise<void>;
+  /** Define quem enxerga a obra. Só quem criou pode chamar. */
+  setSharing(
+    workId: string,
+    scope: ShareScope,
+    userIds: string[]
+  ): Promise<void>;
   /** Envia a foto já comprimida para o Storage e devolve o registro pronto. */
   uploadPhoto(workId: string, file: Blob): Promise<Photo>;
   deletePhoto(photo: Photo): Promise<void>;

@@ -2,6 +2,9 @@
 
 export type WorkStatus = "active" | "completed";
 
+/** Quem enxerga a obra além de quem a criou. */
+export type ShareScope = "private" | "selected" | "company";
+
 export type Task = {
   id: string;
   label: string;
@@ -34,6 +37,12 @@ export type Photo = {
 
 export type Work = {
   id: string;
+  /** Quem criou. Só essa pessoa apaga a obra e muda o compartilhamento. */
+  ownerId: string;
+  companyId: string | null;
+  shareScope: ShareScope;
+  /** Ids de quem recebeu a obra. Só vem preenchido para quem criou. */
+  sharedWith: string[];
   street: string;
   city: string;
   zip: string;

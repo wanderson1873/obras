@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowUpRight,
+  Building2,
   Camera,
   CalendarDays,
   Check,
@@ -14,13 +15,16 @@ import {
   History,
   House,
   ImagePlus,
+  Lock,
   Loader2,
   MapPin,
   Navigation,
   Plus,
   RotateCcw,
+  Share2,
   Star,
   Trash2,
+  UserRound,
   X,
   Zap,
 } from "lucide-react";
@@ -34,6 +38,11 @@ import type { Work } from "@/features/works/types";
 import { usePhotoPicker } from "./usePhotoPicker";
 
 type DetailActions = {
+  /** false quando a obra chegou compartilhada por outra pessoa. */
+  isMine: boolean;
+  /** Quantas pessoas enxergam além de quem criou. */
+  sharedCount: number;
+  onShare: () => void;
   onBack: () => void;
   onNavigate: () => void;
   onEdit: () => void;
@@ -57,6 +66,11 @@ export function WorkDetail({
   const [newTask, setNewTask] = useState("");
   const [newUpdate, setNewUpdate] = useState("");
   const doneCount = work.tasks.filter(task => task.done).length;
+  const compartilhamento = describeSharing(
+    work,
+    actions.isMine,
+    actions.sharedCount
+  );
   const picker = usePhotoPicker(actions.onAddPhotos);
 
   return (
@@ -105,6 +119,31 @@ export function WorkDetail({
             </div>
           </section>
         )}
+
+        <section className="mb-7">
+          <SectionHeading icon={<Share2 size={16} />} label="Quem enxerga" />
+          <div className="mt-3 flex items-center gap-3 rounded-2xl border border-[#eae4da] bg-white px-4 py-3">
+            <span className="shrink-0 text-[#e86a33]">
+              {compartilhamento.icon}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[14px] font-semibold text-[#47556a]">
+                {compartilhamento.title}
+              </span>
+              <span className="block text-[12px] leading-4 text-[#8a929d]">
+                {compartilhamento.description}
+              </span>
+            </span>
+            {actions.isMine && (
+              <button
+                onClick={actions.onShare}
+                className="shrink-0 rounded-xl bg-[#f3f0e9] px-3 py-2 text-[12px] font-bold text-[#4f5c6e] transition active:scale-95"
+              >
+                Mudar
+              </button>
+            )}
+          </div>
+        </section>
 
         <section className="mb-7">
           <SectionHeading
@@ -359,16 +398,51 @@ export function WorkDetail({
             </button>
           )}
 
-          <button
-            onClick={actions.onDelete}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl text-[13px] font-bold text-[#a8503a] transition active:scale-[0.98]"
-          >
-            <Trash2 size={15} /> Apagar ficha
-          </button>
+          {actions.isMine && (
+            <button
+              onClick={actions.onDelete}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl text-[13px] font-bold text-[#a8503a] transition active:scale-[0.98]"
+            >
+              <Trash2 size={15} /> Apagar ficha
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+/** Frase que descreve o compartilhamento atual da obra. */
+function describeSharing(work: Work, isMine: boolean, sharedCount: number) {
+  if (!isMine) {
+    return {
+      icon: <UserRound size={17} />,
+      title: "Compartilhada com você",
+      description: "Você pode editar e registrar o andamento, mas não apagar.",
+    };
+  }
+  if (work.shareScope === "company") {
+    return {
+      icon: <Building2 size={17} />,
+      title: "Toda a equipe",
+      description: "Quem entrar na equipe depois também vai enxergar.",
+    };
+  }
+  if (work.shareScope === "selected") {
+    return {
+      icon: <Share2 size={17} />,
+      title:
+        sharedCount === 1
+          ? "Compartilhada com 1 pessoa"
+          : `Compartilhada com ${sharedCount} pessoas`,
+      description: "Só quem você escolheu enxerga esta obra.",
+    };
+  }
+  return {
+    icon: <Lock size={17} />,
+    title: "Só você",
+    description: "Ninguém mais da equipe enxerga esta obra.",
+  };
 }
 
 function Gallery({

@@ -17,6 +17,10 @@ const SIGNED_URL_TTL_SECONDS = 60 * 60 * 8;
 
 type WorkRow = {
   id: string;
+  user_id: string;
+  company_id: string | null;
+  share_scope: "private" | "selected" | "company";
+  work_viewers: { user_id: string }[];
   street: string;
   city: string;
   zip: string;
@@ -37,12 +41,14 @@ type WorkRow = {
 };
 
 const SELECT_WORK = `
-  id, street, city, zip, code, service, description, observations,
+  id, user_id, company_id, share_scope,
+  street, city, zip, code, service, description, observations,
   water_available, power_available, start_date, status, completed_at, position,
   work_tasks (id, label, done, position),
   work_updates (id, entry_date, text),
   work_history (id, entry_date, title),
-  work_photos (id, storage_path, position)
+  work_photos (id, storage_path, position),
+  work_viewers (user_id)
 `;
 
 async function currentUserId(): Promise<string> {
@@ -79,6 +85,10 @@ async function signPhotoUrls(paths: string[]): Promise<Map<string, string>> {
 function toWork(row: WorkRow, signedUrls: Map<string, string>): Work {
   return {
     id: row.id,
+    ownerId: row.user_id,
+    companyId: row.company_id,
+    shareScope: row.share_scope,
+    sharedWith: row.work_viewers.map(viewer => viewer.user_id),
     street: row.street,
     city: row.city,
     zip: row.zip,
@@ -182,6 +192,15 @@ export const supabaseWorksRepository: WorksRepository = {
   async save(work) {
     const { error } = await supabase.rpc("save_work", {
       payload: toPayload(work),
+    });
+    if (error) throw error;
+  },
+
+  async setSharing(workId, scope, userIds) {
+    const { error } = await supabase.rpc("set_work_sharing", {
+      p_work_id: workId,
+      p_scope: scope,
+      p_user_ids: userIds,
     });
     if (error) throw error;
   },

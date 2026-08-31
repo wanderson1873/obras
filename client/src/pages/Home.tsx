@@ -10,13 +10,17 @@ import { WorkFormSheet } from "@/features/works/components/WorkFormSheet";
 import { WorkList } from "@/features/works/components/WorkList";
 import { useWorks } from "@/features/works/useWorks";
 import { AccountSheet } from "@/features/auth/AccountSheet";
+import { ShareSheet } from "@/features/works/components/ShareSheet";
+import { useCompany } from "@/features/company/useCompany";
+import { CompanySheet } from "@/features/company/CompanySheet";
 import type { Work, WorkStatus } from "@/features/works/types";
 
 type FormState = { kind: "new" } | { kind: "edit"; workId: string };
 type Confirmation = { kind: "complete" | "delete"; workId: string };
 
 export default function Home() {
-  const works = useWorks();
+  const { company } = useCompany();
+  const works = useWorks(company?.id ?? null);
   const [tab, setTab] = useState<WorkStatus>("active");
   const [query, setQuery] = useState("");
   const [openWorkId, setOpenWorkId] = useState<string | null>(null);
@@ -25,6 +29,8 @@ export default function Home() {
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [organizing, setOrganizing] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
+  const [sharingWorkId, setSharingWorkId] = useState<string | null>(null);
+  const [showTeam, setShowTeam] = useState(false);
 
   const byId = (id: string | null) =>
     id ? (works.works.find(work => work.id === id) ?? null) : null;
@@ -45,6 +51,11 @@ export default function Home() {
   const editingWork =
     formState?.kind === "edit" ? byId(formState.workId) : undefined;
   const confirmationWork = byId(confirmation?.workId ?? null);
+  const sharingWork = byId(sharingWorkId);
+  // Ninguém compartilha uma obra consigo mesmo.
+  const outrosMembros = (company?.members ?? []).filter(
+    m => m.userId !== works.myId
+  );
 
   function handleSave(
     input: Parameters<typeof works.createWork>[0],
@@ -95,6 +106,9 @@ export default function Home() {
           <WorkDetail
             key={openWork.id}
             work={openWork}
+            isMine={openWork.ownerId === works.myId}
+            sharedCount={openWork.sharedWith.length}
+            onShare={() => setSharingWorkId(openWork.id)}
             onBack={() => setOpenWorkId(null)}
             onNavigate={() => setNavigationWorkId(openWork.id)}
             onEdit={() => setFormState({ kind: "edit", workId: openWork.id })}
@@ -143,6 +157,7 @@ export default function Home() {
             }}
             onAccount={() => setShowAccount(true)}
             onOrganize={() => setOrganizing(true)}
+            myId={works.myId}
           />
         )}
       </main>
@@ -156,7 +171,29 @@ export default function Home() {
         />
       )}
 
-      {showAccount && <AccountSheet onClose={() => setShowAccount(false)} />}
+      {showAccount && (
+        <AccountSheet
+          onClose={() => setShowAccount(false)}
+          onOpenTeam={() => {
+            setShowAccount(false);
+            setShowTeam(true);
+          }}
+        />
+      )}
+
+      {showTeam && <CompanySheet onClose={() => setShowTeam(false)} />}
+
+      {sharingWork && company && (
+        <ShareSheet
+          work={sharingWork}
+          members={outrosMembros}
+          companyName={company.name}
+          onClose={() => setSharingWorkId(null)}
+          onSave={(scope, userIds) =>
+            works.setSharing(sharingWork.id, scope, userIds)
+          }
+        />
+      )}
 
       {navigationWork && (
         <NavigationSheet
