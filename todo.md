@@ -1,3 +1,37 @@
+# Em andamento: compartilhamento entre a equipe (31 ago 2026)
+
+Modelo escolhido: toda obra é privada de quem criou. Quem criou decide
+compartilhar com pessoas específicas ou com a empresa inteira. Não existe
+"vê tudo" — o Dhiego não enxerga as obras que eu ou o Espano criamos, a menos
+que a gente compartilhe. Ser administrador serve só para gerenciar quem entra.
+Quem recebe uma obra pode editar tudo nela, mas não apagar nem mudar quem vê.
+
+## Banco (pronto e testado)
+- [x] Tabelas companies, company_members, company_invites e work_viewers.
+- [x] Colunas company_id e share_scope em works.
+- [x] Políticas de leitura e escrita para obras compartilhadas.
+- [x] Tabelas filhas e Storage seguindo a visibilidade da obra, não o dono.
+- [x] Gatilho impedindo quem recebeu a obra de mudar dono, empresa ou
+      compartilhamento.
+- [x] Funções create_company, claim_invites e set_work_sharing.
+- [x] Tudo aditivo: nada removido nem renomeado, então o app em produção
+      continuou funcionando durante a mudança.
+- [x] Testado com quatro usuários fictícios: cada um enxerga exatamente o que
+      deveria, e quem está fora da empresa não vê nada.
+- [x] Testado que quem recebe edita o conteúdo mas é barrado ao tentar mudar o
+      compartilhamento, roubar a obra ou apagá-la.
+
+## Interface (ainda não feita)
+- [ ] Criar a empresa e convidar por e-mail.
+- [ ] Tela de membros da equipe.
+- [ ] Escolher o compartilhamento ao criar e editar a ficha.
+- [ ] Mostrar no card quem compartilhou a obra comigo.
+- [ ] Aceitar convite pendente ao entrar.
+
+## Pendências fora do código
+- [ ] Dhiego e Espano precisam criar conta no app.
+- [ ] Ligar "Leaked Password Protection" no Supabase (é só um botão).
+
 # Atualização: entrar com o Google (31 ago 2026)
 
 - [x] Botão "Entrar com o Google" na tela de entrada, com o logotipo da marca.
