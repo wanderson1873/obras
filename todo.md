@@ -1,3 +1,22 @@
+# Em andamento: tradução do conteúdo escrito (1 set 2026)
+
+## Servidor (pronto e testado)
+- [x] Chave do Google Translate conferida: traduz e detecta o idioma de origem.
+- [x] Tabela content_translations, com leitura liberada só para quem enxerga a obra.
+- [x] Função translate-work: lê a obra com o token de quem chamou (o RLS impede
+      mandar traduzir obra alheia) e grava com a chave de serviço.
+- [x] Endereço, cidade e código ficam fora do tradutor de propósito.
+- [x] Atualizações escritas pelo app ganham system_key e ficam fora do tradutor —
+      "Ficha criada." estava virando "Character sheet created.".
+- [x] Testado com obra real: "Lixar todos os andares" -> "Sand all the floors" /
+      "Lija todos los pisos", e as três tarefas junto.
+
+## Interface (ainda não feita)
+- [ ] Chamar a tradução depois de salvar a ficha.
+- [ ] Mostrar o texto no idioma de quem lê, caindo no original quando não houver.
+- [ ] Botão "ver original" na ficha.
+- [ ] Mostrar atualizações do app pelo dicionário, via system_key.
+
 # Atualização: interface em três idiomas (31 ago 2026)
 
 - [x] Português, inglês e espanhol, detectados pelo idioma do aparelho.
