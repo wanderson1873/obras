@@ -43,7 +43,10 @@ export const supabase = createClient(
       // Mantém a sessão no aparelho: o login é feito uma vez só.
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false,
+      // Links de confirmação de e-mail e de recuperação de senha voltam com um
+      // token na URL. Sem isto o app ignora esse token e a volta do e-mail não
+      // completa o login.
+      detectSessionInUrl: true,
     },
   }
 );

@@ -4,7 +4,7 @@ import {
   ArrowUpDown,
   CloudOff,
   House,
-  LogOut,
+  UserRound,
   Plus,
   RefreshCw,
   Search,
@@ -29,7 +29,7 @@ export function WorkList({
   onNavigate,
   onNew,
   onRefresh,
-  onSignOut,
+  onAccount,
   onOrganize,
 }: {
   works: Work[];
@@ -45,7 +45,7 @@ export function WorkList({
   onNavigate: (work: Work) => void;
   onNew: () => void;
   onRefresh: () => void;
-  onSignOut: () => void;
+  onAccount: () => void;
   onOrganize: () => void;
 }) {
   return (
@@ -77,11 +77,11 @@ export function WorkList({
             </p>
           </div>
           <button
-            onClick={onSignOut}
-            aria-label="Sair da conta"
+            onClick={onAccount}
+            aria-label="Sua conta"
             className="grid h-9 w-9 place-items-center rounded-full bg-[#f0ece4] text-[#5d6878] transition active:scale-90"
           >
-            <LogOut size={16} />
+            <UserRound size={16} />
           </button>
         </div>
       </header>

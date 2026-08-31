@@ -1,3 +1,26 @@
+# Atualização: conta, 404 e condições do local (30 ago 2026)
+
+## Correção do 404 após o login
+- [x] Caminho desconhecido volta para a tela do app em vez de um 404 sem saída.
+      O app tem uma tela só; um 404 ali é sempre um beco.
+- [x] `detectSessionInUrl: true` — estava desligado, então o token que volta no
+      link de confirmação de e-mail era ignorado. Também é o que faz o link de
+      recuperação de senha funcionar.
+- [x] Remover a página NotFound (estava em inglês e fora do visual do app).
+
+## Conta
+- [x] Botão de conta no cabeçalho, no lugar do "sair" solto.
+- [x] Mostrar e-mail cadastrado e data de criação da conta.
+- [x] Alterar senha, exigindo a senha atual — o celular fica sempre logado, e sem
+      isso quem pegasse o aparelho destrancado tomaria a conta.
+- [x] "Esqueci minha senha" na tela de entrada.
+
+## Condições do local
+- [x] Mostrar também quando TEM água e energia, em verde, e não só as faltas.
+
+## Pendente
+- [ ] Login por telefone: depende de contratar um provedor de SMS no Supabase.
+
 # Atualização: código em destaque no card (30 ago 2026)
 
 - [x] Trocar endereço e código de lugar: o código vira o destaque do card e o

@@ -25,6 +25,13 @@ type AuthValue = {
     email: string,
     password: string
   ) => Promise<{ needsConfirmation: boolean }>;
+  /** Troca a senha, confirmando antes que quem pediu sabe a senha atual. */
+  updatePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<void>;
+  /** Envia o e-mail de recuperação para quem esqueceu a senha. */
+  sendPasswordReset: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -81,6 +88,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
         // Sem sessão na resposta significa que o projeto exige confirmar o e-mail.
         return { needsConfirmation: !data.session };
+      },
+
+      async updatePassword(currentPassword, newPassword) {
+        const email = session?.user.email;
+        if (!email) throw new Error("Sessão expirada. Entre novamente.");
+
+        // O celular fica sempre logado. Sem conferir a senha atual, quem
+        // pegasse o aparelho destrancado trocaria a senha e tomaria a conta.
+        const { error: wrongPassword } = await supabase.auth.signInWithPassword(
+          {
+            email,
+            password: currentPassword,
+          }
+        );
+        if (wrongPassword) throw new Error("Senha atual incorreta.");
+
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+        if (error) throw error;
+      },
+
+      async sendPasswordReset(email) {
+        const { error } = await supabase.auth.resetPasswordForEmail(
+          email.trim(),
+          {
+            redirectTo: window.location.origin,
+          }
+        );
+        if (error) throw error;
       },
 
       async signOut() {

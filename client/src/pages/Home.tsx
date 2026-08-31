@@ -9,7 +9,7 @@ import { WorkDetail } from "@/features/works/components/WorkDetail";
 import { WorkFormSheet } from "@/features/works/components/WorkFormSheet";
 import { WorkList } from "@/features/works/components/WorkList";
 import { useWorks } from "@/features/works/useWorks";
-import { useAuth } from "@/features/auth/AuthContext";
+import { AccountSheet } from "@/features/auth/AccountSheet";
 import type { Work, WorkStatus } from "@/features/works/types";
 
 type FormState = { kind: "new" } | { kind: "edit"; workId: string };
@@ -17,7 +17,6 @@ type Confirmation = { kind: "complete" | "delete"; workId: string };
 
 export default function Home() {
   const works = useWorks();
-  const { signOut } = useAuth();
   const [tab, setTab] = useState<WorkStatus>("active");
   const [query, setQuery] = useState("");
   const [openWorkId, setOpenWorkId] = useState<string | null>(null);
@@ -25,6 +24,7 @@ export default function Home() {
   const [navigationWorkId, setNavigationWorkId] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [organizing, setOrganizing] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
 
   const byId = (id: string | null) =>
     id ? (works.works.find(work => work.id === id) ?? null) : null;
@@ -141,9 +141,7 @@ export default function Home() {
             onRefresh={() => {
               void works.refresh();
             }}
-            onSignOut={() => {
-              void signOut();
-            }}
+            onAccount={() => setShowAccount(true)}
             onOrganize={() => setOrganizing(true)}
           />
         )}
@@ -157,6 +155,8 @@ export default function Home() {
           onSave={handleSave}
         />
       )}
+
+      {showAccount && <AccountSheet onClose={() => setShowAccount(false)} />}
 
       {navigationWork && (
         <NavigationSheet

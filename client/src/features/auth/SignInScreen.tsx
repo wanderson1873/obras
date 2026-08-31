@@ -13,6 +13,8 @@ function readableError(message: string) {
     "Invalid login credentials": "E-mail ou senha incorretos.",
     "Email not confirmed": "Confirme o e-mail antes de entrar.",
     "User already registered": "Esse e-mail já tem conta. Use Entrar.",
+    "For security purposes, you can only request this after 60 seconds.":
+      "Aguarde um minuto antes de pedir de novo.",
     "Password should be at least 6 characters.":
       "A senha precisa ter pelo menos 6 caracteres.",
   };
@@ -20,12 +22,13 @@ function readableError(message: string) {
 }
 
 export function SignInScreen() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, sendPasswordReset } = useAuth();
   const [mode, setMode] = useState<Mode>("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sendingReset, setSendingReset] = useState(false);
 
   const isSignUp = mode === "signUp";
 
@@ -61,6 +64,29 @@ export function SignInScreen() {
       setError(readableError(message));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function recoverPassword() {
+    if (!email.trim()) {
+      setError("Escreva seu e-mail acima para receber o link de recuperação.");
+      return;
+    }
+    setError(null);
+    setSendingReset(true);
+    try {
+      await sendPasswordReset(email);
+      toast.success("E-mail enviado", {
+        description: "Abra o link e depois troque a senha em Conta.",
+      });
+    } catch (caught) {
+      const message =
+        caught instanceof Error
+          ? caught.message
+          : "Não foi possível enviar o e-mail.";
+      setError(readableError(message));
+    } finally {
+      setSendingReset(false);
     }
   }
 
@@ -139,12 +165,22 @@ export function SignInScreen() {
           </button>
         </form>
 
+        {!isSignUp && (
+          <button
+            onClick={recoverPassword}
+            disabled={sendingReset}
+            className="mt-4 w-full text-center text-[13px] font-semibold text-[#6d7889] disabled:opacity-60"
+          >
+            {sendingReset ? "Enviando…" : "Esqueci minha senha"}
+          </button>
+        )}
+
         <button
           onClick={() => {
             setMode(isSignUp ? "signIn" : "signUp");
             setError(null);
           }}
-          className="mt-5 w-full text-center text-[13px] font-semibold text-[#a7502b]"
+          className="mt-3 w-full text-center text-[13px] font-semibold text-[#a7502b]"
         >
           {isSignUp ? "Já tenho conta. Entrar" : "Ainda não tenho conta. Criar"}
         </button>

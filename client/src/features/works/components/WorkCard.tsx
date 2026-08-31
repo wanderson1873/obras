@@ -25,7 +25,6 @@ export function WorkCard({
   onNavigate: () => void;
 }) {
   const cover = work.photos[0]?.url;
-  const hasWarning = !work.waterAvailable || !work.powerAvailable;
 
   return (
     <article
@@ -130,16 +129,20 @@ export function WorkCard({
           {work.service}
         </p>
 
-        {hasWarning && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {!work.waterAvailable && (
-              <WarningChip icon={<Droplets size={12} />} label="Sem água" />
-            )}
-            {!work.powerAvailable && (
-              <WarningChip icon={<Zap size={12} />} label="Sem energia" />
-            )}
-          </div>
-        )}
+        {/* Saber que TEM água é tão útil quanto saber que não tem: evita
+            carregar galão à toa. Por isso os dois estados aparecem. */}
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          <ConditionChip
+            icon={<Droplets size={12} />}
+            available={work.waterAvailable}
+            label="água"
+          />
+          <ConditionChip
+            icon={<Zap size={12} />}
+            available={work.powerAvailable}
+            label="energia"
+          />
+        </div>
       </div>
     </article>
   );
@@ -166,16 +169,24 @@ function RouteButton({
   );
 }
 
-function WarningChip({
+function ConditionChip({
   icon,
   label,
+  available,
 }: {
   icon: React.ReactNode;
   label: string;
+  available: boolean;
 }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-[#fff0e8] px-2 py-1 font-mono-field text-[9px] font-medium uppercase tracking-[0.06em] text-[#a74b29]">
-      {icon} {label}
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 font-mono-field text-[9px] font-medium uppercase tracking-[0.06em] ${
+        available
+          ? "bg-[#edf8f0] text-[#43825c]"
+          : "bg-[#fff0e8] text-[#a74b29]"
+      }`}
+    >
+      {icon} {available ? `Com ${label}` : `Sem ${label}`}
     </span>
   );
 }
