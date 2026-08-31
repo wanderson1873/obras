@@ -326,6 +326,14 @@ export const es: Translations = {
   "config.body":
     "La app arrancó pero no sabe a qué base conectarse. Define estas dos variables en Ambiente, en el panel, y reinicia el servicio:",
 
+  "translated.from": "Traducido del {lang}",
+  "translated.showOriginal": "Ver original",
+  "translated.showTranslation": "Ver traducción",
+  "translated.originalTitle": "Original, tal como se escribió",
+  "lang.pt": "portugués",
+  "lang.en": "inglés",
+  "lang.es": "español",
+
   "date.unknown": "fecha no indicada",
   "date.durationUnavailable": "duración no disponible",
   "date.startsTomorrow": "empieza mañana",

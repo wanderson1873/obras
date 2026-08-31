@@ -21,6 +21,7 @@ import {
   Navigation,
   Plus,
   RotateCcw,
+  Languages,
   Share2,
   Star,
   Trash2,
@@ -31,7 +32,12 @@ import {
 import { useT } from "@/i18n/I18nContext";
 import { useDates } from "@/i18n/useDates";
 import type { TranslationKey } from "@/i18n/translations";
-import type { Work } from "@/features/works/types";
+import {
+  taskLabel,
+  updateText,
+  workText,
+  type Work,
+} from "@/features/works/types";
 import { usePhotoPicker } from "./usePhotoPicker";
 
 type DetailActions = {
@@ -64,6 +70,7 @@ export function WorkDetail({
   const d = useDates();
   const [newTask, setNewTask] = useState("");
   const [newUpdate, setNewUpdate] = useState("");
+  const [verOriginal, setVerOriginal] = useState(false);
   const doneCount = work.tasks.filter(task => task.done).length;
   const compartilhamento = describeSharing(
     work,
@@ -102,6 +109,25 @@ export function WorkDetail({
             {d.duration(work.startDate)}
           </p>
         </header>
+
+        {work.translation && work.sourceLang && (
+          <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-[#dfe6f0] bg-[#f4f7fc] px-3.5 py-2.5">
+            <Languages size={15} className="shrink-0 text-[#5b7ca6]" />
+            <span className="min-w-0 flex-1 text-[12px] leading-4 text-[#4f5c6e]">
+              {verOriginal
+                ? t("translated.originalTitle")
+                : t("translated.from", { lang: t(`lang.${work.sourceLang}`) })}
+            </span>
+            <button
+              onClick={() => setVerOriginal(atual => !atual)}
+              className="shrink-0 rounded-lg bg-white px-2.5 py-1.5 text-[11px] font-bold text-[#43587a] shadow-sm transition active:scale-95"
+            >
+              {verOriginal
+                ? t("translated.showTranslation")
+                : t("translated.showOriginal")}
+            </button>
+          </div>
+        )}
 
         <button
           onClick={actions.onNavigate}
@@ -174,11 +200,11 @@ export function WorkDetail({
           <SectionHeading icon={<House size={16} />} label={t("detail.work")} />
           <div className="mt-3 rounded-2xl bg-[#f3f0e9] px-4 py-3.5">
             <p className="text-[14px] font-bold text-[#3e4b5d]">
-              {work.service}
+              {workText(work, "service", verOriginal)}
             </p>
             {work.description && (
               <p className="mt-2 text-[14px] leading-6 text-[#637084]">
-                {work.description}
+                {workText(work, "description", verOriginal)}
               </p>
             )}
           </div>
@@ -206,8 +232,12 @@ export function WorkDetail({
                     onClick={() => actions.onToggleTask(task.id)}
                     aria-label={
                       task.done
-                        ? t("detail.uncheckTask", { task: task.label })
-                        : t("detail.checkTask", { task: task.label })
+                        ? t("detail.uncheckTask", {
+                            task: taskLabel(work, task, verOriginal),
+                          })
+                        : t("detail.checkTask", {
+                            task: taskLabel(work, task, verOriginal),
+                          })
                     }
                     className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border transition active:scale-90 ${task.done ? "border-[#599875] bg-[#599875] text-white" : "border-[#cfd3d4] bg-white"}`}
                   >
@@ -216,11 +246,13 @@ export function WorkDetail({
                   <span
                     className={`flex-1 text-[14px] font-medium ${task.done ? "text-[#a0a6ad] line-through" : "text-[#435064]"}`}
                   >
-                    {task.label}
+                    {taskLabel(work, task, verOriginal)}
                   </span>
                   <button
                     onClick={() => actions.onRemoveTask(task.id)}
-                    aria-label={t("detail.removeTask", { task: task.label })}
+                    aria-label={t("detail.removeTask", {
+                      task: taskLabel(work, task, verOriginal),
+                    })}
                     className="p-1 opacity-60 transition hover:opacity-100 focus:opacity-100"
                   >
                     <Trash2 size={15} className="text-[#b5a29a]" />
@@ -248,7 +280,7 @@ export function WorkDetail({
             label={t("detail.notes")}
           />
           <p className="mt-3 rounded-2xl bg-[#f3f0e9] px-4 py-3.5 text-[14px] leading-6 text-[#637084]">
-            {work.observations || t("detail.noNotes")}
+            {workText(work, "observations", verOriginal) || t("detail.noNotes")}
           </p>
         </section>
 
@@ -346,7 +378,9 @@ export function WorkDetail({
                 </div>
                 <div className="-mt-0.5 flex flex-1 items-start gap-2 rounded-xl bg-[#f3f0e9] px-3.5 py-2.5">
                   <p className="flex-1 text-[13px] leading-5 text-[#546174]">
-                    {update.text}
+                    {update.systemKey
+                      ? t(update.systemKey as TranslationKey)
+                      : updateText(work, update, verOriginal)}
                   </p>
                   <button
                     onClick={() => actions.onRemoveUpdate(update.id)}

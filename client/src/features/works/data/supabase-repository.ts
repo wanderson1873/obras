@@ -7,7 +7,7 @@
  */
 
 import { supabase } from "@/lib/supabase";
-import type { Photo, Work } from "@/features/works/types";
+import type { Photo, Translation, Work } from "@/features/works/types";
 import type { WorksRepository } from "./repository";
 
 const BUCKET = "work-photos";
@@ -34,8 +34,14 @@ type WorkRow = {
   status: "active" | "completed";
   completed_at: string | null;
   position: number;
+  source_lang: "pt" | "en" | "es" | null;
   work_tasks: { id: string; label: string; done: boolean; position: number }[];
-  work_updates: { id: string; entry_date: string; text: string }[];
+  work_updates: {
+    id: string;
+    entry_date: string;
+    text: string;
+    system_key: string | null;
+  }[];
   work_history: { id: string; entry_date: string; title: string }[];
   work_photos: { id: string; storage_path: string; position: number }[];
 };
@@ -43,9 +49,9 @@ type WorkRow = {
 const SELECT_WORK = `
   id, user_id, company_id, share_scope,
   street, city, zip, code, service, description, observations,
-  water_available, power_available, start_date, status, completed_at, position,
+  water_available, power_available, start_date, status, completed_at, position, source_lang,
   work_tasks (id, label, done, position),
-  work_updates (id, entry_date, text),
+  work_updates (id, entry_date, text, system_key),
   work_history (id, entry_date, title),
   work_photos (id, storage_path, position),
   work_viewers (user_id)
@@ -82,7 +88,40 @@ async function signPhotoUrls(paths: string[]): Promise<Map<string, string>> {
   return signed;
 }
 
-function toWork(row: WorkRow, signedUrls: Map<string, string>): Work {
+type LinhaTraducao = {
+  work_id: string;
+  entity_id: string;
+  field: string;
+  translated: string;
+};
+
+/** Agrupa as traduções por obra, no formato que a tela consome. */
+function agruparTraducoes(linhas: LinhaTraducao[]) {
+  const porObra = new Map<string, Translation>();
+  for (const linha of linhas) {
+    let atual = porObra.get(linha.work_id);
+    if (!atual) {
+      atual = { tasks: {}, updates: {} };
+      porObra.set(linha.work_id, atual);
+    }
+    if (linha.field === "service") atual.service = linha.translated;
+    else if (linha.field === "description")
+      atual.description = linha.translated;
+    else if (linha.field === "observations")
+      atual.observations = linha.translated;
+    else if (linha.field === "label")
+      atual.tasks[linha.entity_id] = linha.translated;
+    else if (linha.field === "text")
+      atual.updates[linha.entity_id] = linha.translated;
+  }
+  return porObra;
+}
+
+function toWork(
+  row: WorkRow,
+  signedUrls: Map<string, string>,
+  translation: Translation | null
+): Work {
   return {
     id: row.id,
     ownerId: row.user_id,
@@ -101,6 +140,8 @@ function toWork(row: WorkRow, signedUrls: Map<string, string>): Work {
     startDate: row.start_date,
     status: row.status,
     position: row.position,
+    sourceLang: row.source_lang,
+    translation,
     completedAt: row.completed_at ?? undefined,
     photos: [...row.work_photos]
       .sort((a, b) => a.position - b.position)
@@ -118,6 +159,7 @@ function toWork(row: WorkRow, signedUrls: Map<string, string>): Work {
         id: update.id,
         date: update.entry_date,
         text: update.text,
+        systemKey: update.system_key ?? undefined,
       })),
     history: [...row.work_history]
       .sort((a, b) => b.entry_date.localeCompare(a.entry_date))
@@ -157,6 +199,7 @@ function toPayload(work: Work) {
       id: update.id,
       entry_date: update.date,
       text: update.text,
+      system_key: update.systemKey ?? null,
     })),
     history: work.history.map(entry => ({
       id: entry.id,
@@ -172,7 +215,7 @@ function toPayload(work: Work) {
 }
 
 export const supabaseWorksRepository: WorksRepository = {
-  async list() {
+  async list(language) {
     const { data, error } = await supabase
       .from("works")
       .select(SELECT_WORK)
@@ -184,14 +227,32 @@ export const supabaseWorksRepository: WorksRepository = {
     const paths = rows.flatMap(row =>
       row.work_photos.map(photo => photo.storage_path)
     );
-    const signedUrls = await signPhotoUrls(paths);
+    const [signedUrls, { data: linhas }] = await Promise.all([
+      signPhotoUrls(paths),
+      supabase
+        .from("content_translations")
+        .select("work_id, entity_id, field, translated")
+        .eq("lang", language),
+    ]);
 
-    return rows.map(row => toWork(row, signedUrls));
+    const traducoes = agruparTraducoes((linhas ?? []) as LinhaTraducao[]);
+
+    return rows.map(row =>
+      toWork(row, signedUrls, traducoes.get(row.id) ?? null)
+    );
   },
 
   async save(work) {
     const { error } = await supabase.rpc("save_work", {
       payload: toPayload(work),
+    });
+    if (error) throw error;
+  },
+
+  /** Dispara a tradução do conteúdo. Falhar aqui não pode derrubar o salvamento. */
+  async requestTranslation(workId) {
+    const { error } = await supabase.functions.invoke("translate-work", {
+      body: { work_id: workId },
     });
     if (error) throw error;
   },

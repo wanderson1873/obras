@@ -338,6 +338,15 @@ export const pt = {
   "config.body":
     "O app subiu, mas não sabe a qual banco se conectar. Defina estas duas variáveis em Ambiente, no painel, e reinicie o serviço:",
 
+  // Tradução do conteúdo
+  "translated.from": "Traduzido do {lang}",
+  "translated.showOriginal": "Ver original",
+  "translated.showTranslation": "Ver tradução",
+  "translated.originalTitle": "Original, como foi escrito",
+  "lang.pt": "português",
+  "lang.en": "inglês",
+  "lang.es": "espanhol",
+
   // Datas
   "date.unknown": "data não informada",
   "date.durationUnavailable": "duração indisponível",

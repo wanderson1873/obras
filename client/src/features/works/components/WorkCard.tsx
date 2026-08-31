@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useT } from "@/i18n/I18nContext";
 import { useDates } from "@/i18n/useDates";
-import type { Work } from "@/features/works/types";
+import { workText, type Work } from "@/features/works/types";
 
 export function WorkCard({
   work,
@@ -138,7 +138,7 @@ export function WorkCard({
         </div>
 
         <p className="field-rule mt-3 line-clamp-1 pb-2 text-[13px] font-semibold text-[#5e6979]">
-          {work.service}
+          {workText(work, "service")}
         </p>
 
         {/* Saber que TEM água é tão útil quanto saber que não tem: evita

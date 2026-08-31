@@ -9,7 +9,8 @@
 import type { Photo, ShareScope, Work } from "@/features/works/types";
 
 export interface WorksRepository {
-  list(): Promise<Work[]>;
+  /** `language` decide em que idioma o conteúdo volta. */
+  list(language: "pt" | "en" | "es"): Promise<Work[]>;
   /** Cria ou atualiza a ficha inteira, em uma transação só. */
   save(work: Work): Promise<void>;
   remove(id: string): Promise<void>;
@@ -21,6 +22,8 @@ export interface WorksRepository {
     scope: ShareScope,
     userIds: string[]
   ): Promise<void>;
+  /** Manda traduzir o conteúdo escrito da obra para os outros idiomas. */
+  requestTranslation(workId: string): Promise<void>;
   /** Envia a foto já comprimida para o Storage e devolve o registro pronto. */
   uploadPhoto(workId: string, file: Blob): Promise<Photo>;
   deletePhoto(photo: Photo): Promise<void>;

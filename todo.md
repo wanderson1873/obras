@@ -11,11 +11,12 @@
 - [x] Testado com obra real: "Lixar todos os andares" -> "Sand all the floors" /
       "Lija todos los pisos", e as três tarefas junto.
 
-## Interface (ainda não feita)
-- [ ] Chamar a tradução depois de salvar a ficha.
-- [ ] Mostrar o texto no idioma de quem lê, caindo no original quando não houver.
-- [ ] Botão "ver original" na ficha.
-- [ ] Mostrar atualizações do app pelo dicionário, via system_key.
+## Interface (pronta)
+- [x] Tradução disparada depois de salvar; falhar nela não desfaz o salvamento.
+- [x] Texto no idioma de quem lê, caindo no original quando não houver tradução.
+- [x] Faixa "Traduzido do inglês" com botão "Ver original" na ficha.
+- [x] Atualizações do app saem do dicionário, pela system_key.
+- [x] Testado de ponta a ponta: ficha escrita em inglês, lida em português.
 
 # Atualização: interface em três idiomas (31 ago 2026)
 

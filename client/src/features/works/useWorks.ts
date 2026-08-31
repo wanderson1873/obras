@@ -13,7 +13,7 @@ import { readCachedWorks, writeCachedWorks } from "./data/cache";
 import { supabaseWorksRepository } from "./data/supabase-repository";
 import type { WorksRepository } from "./data/repository";
 import { useAuth } from "@/features/auth/AuthContext";
-import { useT } from "@/i18n/I18nContext";
+import { useI18n } from "@/i18n/I18nContext";
 import type { Photo, ShareScope, Work, WorkInput } from "./types";
 
 const repository: WorksRepository = supabaseWorksRepository;
@@ -40,7 +40,7 @@ function errorMessage(error: unknown, fallback: string) {
 
 export function useWorks(companyId: string | null) {
   const { session } = useAuth();
-  const t = useT();
+  const { t, language } = useI18n();
   const myId = session?.user.id ?? "";
   const [works, setWorks] = useState<Work[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ export function useWorks(companyId: string | null) {
 
   const refresh = useCallback(async () => {
     try {
-      const remote = await repository.list();
+      const remote = await repository.list(language);
       setWorks(sortWorks(remote));
       setOffline(false);
       void writeCachedWorks(remote);
@@ -62,7 +62,7 @@ export function useWorks(companyId: string | null) {
       setOffline(true);
       return false;
     }
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,6 +109,10 @@ export function useWorks(companyId: string | null) {
     try {
       await repository.save(next);
       void writeCachedWorks(worksRef.current);
+      // Tradução é um extra: se falhar, a ficha continua salva no original.
+      void repository.requestTranslation(next.id).catch(erro => {
+        console.warn("Não foi possível traduzir o conteúdo da obra.", erro);
+      });
       return true;
     } catch (error) {
       console.error("Falha ao salvar a obra.", error);
@@ -143,6 +147,8 @@ export function useWorks(companyId: string | null) {
         companyId,
         shareScope: "private",
         sharedWith: [],
+        sourceLang: null,
+        translation: null,
         status: "active",
         position: menorPosicao - 1,
         photos: [],
@@ -150,7 +156,12 @@ export function useWorks(companyId: string | null) {
           ? [{ id: newId(), label: firstTask.trim(), done: false }]
           : [],
         updates: [
-          { id: newId(), date: todayIso(), text: t("work.createdEntry") },
+          {
+            id: newId(),
+            date: todayIso(),
+            text: t("work.createdEntry"),
+            systemKey: "work.createdEntry",
+          },
         ],
         history: [],
       };
@@ -258,6 +269,7 @@ export function useWorks(companyId: string | null) {
             id: newId(),
             date: todayIso(),
             text: t("work.completedEntry"),
+            systemKey: "work.completedEntry",
           },
           ...work.updates,
         ],
@@ -272,7 +284,12 @@ export function useWorks(companyId: string | null) {
         status: "active",
         completedAt: undefined,
         updates: [
-          { id: newId(), date: todayIso(), text: t("work.reopenedEntry") },
+          {
+            id: newId(),
+            date: todayIso(),
+            text: t("work.reopenedEntry"),
+            systemKey: "work.reopenedEntry",
+          },
           ...work.updates,
         ],
       })),

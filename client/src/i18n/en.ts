@@ -324,6 +324,14 @@ export const en: Translations = {
   "config.body":
     "The app started but does not know which database to connect to. Set these two variables under Environment in the panel and restart the service:",
 
+  "translated.from": "Translated from {lang}",
+  "translated.showOriginal": "Show original",
+  "translated.showTranslation": "Show translation",
+  "translated.originalTitle": "Original, as it was written",
+  "lang.pt": "Portuguese",
+  "lang.en": "English",
+  "lang.es": "Spanish",
+
   "date.unknown": "date not set",
   "date.durationUnavailable": "duration unavailable",
   "date.startsTomorrow": "starts tomorrow",

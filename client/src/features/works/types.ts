@@ -16,6 +16,11 @@ export type Update = {
   /** ISO YYYY-MM-DD */
   date: string;
   text: string;
+  /**
+   * Preenchido quando a linha foi escrita pelo próprio app. Nesse caso o texto
+   * sai do dicionário da interface, não do tradutor automático.
+   */
+  systemKey?: string;
 };
 
 export type HistoryEntry = {
@@ -33,6 +38,17 @@ export type Photo = {
   id: string;
   path: string;
   url: string;
+};
+
+/** O que o tradutor devolveu para o idioma de quem está lendo. */
+export type Translation = {
+  service?: string;
+  description?: string;
+  observations?: string;
+  /** id da tarefa -> rótulo traduzido */
+  tasks: Record<string, string>;
+  /** id da atualização -> texto traduzido */
+  updates: Record<string, string>;
 };
 
 export type Work = {
@@ -56,6 +72,10 @@ export type Work = {
   /** ISO YYYY-MM-DD */
   startDate: string;
   status: WorkStatus;
+  /** Idioma em que a ficha foi escrita. Nulo enquanto não foi traduzida. */
+  sourceLang: "pt" | "en" | "es" | null;
+  /** Nulo quando não há tradução para o idioma atual — a tela mostra o original. */
+  translation: Translation | null;
   /** Ordem manual dentro do grupo (em andamento / concluídas). Menor vem primeiro. */
   position: number;
   /** ISO YYYY-MM-DD, presente apenas quando status === "completed" */
@@ -81,3 +101,26 @@ export type WorkInput = Pick<
   | "powerAvailable"
   | "startDate"
 >;
+
+/**
+ * Texto no idioma de quem lê, caindo no original quando não há tradução.
+ * `original` força o texto como foi escrito.
+ */
+export function workText(
+  work: Work,
+  field: "service" | "description" | "observations",
+  original = false
+) {
+  if (original) return work[field];
+  return work.translation?.[field] ?? work[field];
+}
+
+export function taskLabel(work: Work, task: Task, original = false) {
+  if (original) return task.label;
+  return work.translation?.tasks[task.id] ?? task.label;
+}
+
+export function updateText(work: Work, update: Update, original = false) {
+  if (original) return update.text;
+  return work.translation?.updates[update.id] ?? update.text;
+}
