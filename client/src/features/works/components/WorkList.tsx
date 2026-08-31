@@ -51,23 +51,16 @@ export function WorkList({
   return (
     <div className="app-enter min-h-screen px-4 pb-16 pt-7 sm:px-5">
       <header className="mb-7 flex items-center justify-between">
-        {/* "Obras" fica na mesma linha do ícone para os dois centros baterem;
-            a legenda desce alinhada à coluna do texto (ícone 44px + gap 12px). */}
-        <div>
-          <div className="flex items-center gap-3">
-            <div
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-[15px] bg-[#e86a33] shadow-[0_7px_15px_rgba(232,106,51,0.25)]"
-              aria-hidden="true"
-            >
-              <House size={22} strokeWidth={2.4} className="text-white" />
-            </div>
-            <h1 className="text-[25px] font-bold leading-none tracking-[-0.04em] text-[#27374c]">
-              Obras
-            </h1>
+        <div className="flex items-center gap-3">
+          <div
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-[15px] bg-[#e86a33] shadow-[0_7px_15px_rgba(232,106,51,0.25)]"
+            aria-hidden="true"
+          >
+            <House size={22} strokeWidth={2.4} className="text-white" />
           </div>
-          <p className="field-rule ml-[56px] mt-1.5 w-[123px] pb-1.5 font-mono-field text-[9px] font-medium uppercase tracking-[0.16em] text-[#6a7180]">
-            Caderno de campo
-          </p>
+          <h1 className="text-[25px] font-bold leading-none tracking-[-0.04em] text-[#27374c]">
+            Obras
+          </h1>
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right">

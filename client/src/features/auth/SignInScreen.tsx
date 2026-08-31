@@ -93,21 +93,16 @@ export function SignInScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f7f5f0] px-4 text-[#27374c]">
       <div className="app-enter w-full max-w-[400px] rounded-[28px] border border-[#e8e2d7] bg-[#fbfaf7] p-6 shadow-[0_18px_50px_rgba(39,55,76,0.1)]">
-        <div className="mb-7">
-          <div className="flex items-center gap-3">
-            <div
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-[#e86a33] shadow-[0_7px_15px_rgba(232,106,51,0.25)]"
-              aria-hidden="true"
-            >
-              <House size={24} strokeWidth={2.4} className="text-white" />
-            </div>
-            <h1 className="text-[26px] font-bold leading-none tracking-[-0.045em]">
-              Obras
-            </h1>
+        <div className="mb-7 flex items-center gap-3">
+          <div
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-[#e86a33] shadow-[0_7px_15px_rgba(232,106,51,0.25)]"
+            aria-hidden="true"
+          >
+            <House size={24} strokeWidth={2.4} className="text-white" />
           </div>
-          <p className="field-rule ml-[60px] mt-1.5 w-[123px] pb-1.5 font-mono-field text-[9px] font-medium uppercase tracking-[0.16em] text-[#6a7180]">
-            Caderno de campo
-          </p>
+          <h1 className="text-[26px] font-bold leading-none tracking-[-0.045em]">
+            Obras
+          </h1>
         </div>
 
         <p className="mb-6 text-[14px] leading-6 text-[#647084]">

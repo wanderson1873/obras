@@ -88,7 +88,7 @@ export function WorkFormSheet({
   return (
     <BottomSheet
       label={work ? "Editar obra" : "Nova obra"}
-      eyebrow={work ? "Ajustar dados" : "Caderno de campo"}
+      eyebrow={work ? "Ajustar dados" : "Dados da obra"}
       title={work ? "Editar ficha" : "Nova ficha"}
       onClose={onClose}
       centerOnDesktop
