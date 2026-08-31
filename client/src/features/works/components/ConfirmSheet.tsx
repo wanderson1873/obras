@@ -1,5 +1,6 @@
 /** Confirmação para ações que apagam ou encerram — substitui o window.confirm do navegador. */
 
+import { useT } from "@/i18n/I18nContext";
 import { BottomSheet } from "./BottomSheet";
 
 export function ConfirmSheet({
@@ -17,6 +18,7 @@ export function ConfirmSheet({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const t = useT();
   const confirmClasses =
     tone === "danger"
       ? "bg-[#b8462f] text-white shadow-[0_8px_18px_rgba(184,70,47,0.25)]"
@@ -30,7 +32,7 @@ export function ConfirmSheet({
           onClick={onCancel}
           className="h-12 flex-1 rounded-2xl border border-[#e2dbd0] bg-white text-sm font-bold text-[#4c5a6d] transition active:scale-[0.98]"
         >
-          Cancelar
+          {t("common.cancel")}
         </button>
         <button
           onClick={onConfirm}

@@ -6,13 +6,15 @@ import {
   Check,
   ChevronRight,
   KeyRound,
+  Languages,
   Loader2,
   LogOut,
   Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { BottomSheet } from "@/features/works/components/BottomSheet";
-import { formatLongDate } from "@/lib/dates";
+import { useI18n, LANGUAGES, LANGUAGE_NAMES } from "@/i18n/I18nContext";
+import { useDates } from "@/i18n/useDates";
 import { useAuth } from "./AuthContext";
 
 export function AccountSheet({
@@ -23,6 +25,8 @@ export function AccountSheet({
   onOpenTeam: () => void;
 }) {
   const { session, updatePassword, signOut } = useAuth();
+  const { t, language, automatic, setLanguage } = useI18n();
+  const d = useDates();
   const [changing, setChanging] = useState(false);
 
   const email = session?.user.email ?? "—";
@@ -30,25 +34,57 @@ export function AccountSheet({
 
   return (
     <BottomSheet
-      label="Sua conta"
-      eyebrow="Conta"
-      title="Seus dados"
+      label={t("account.label")}
+      eyebrow={t("account.eyebrow")}
+      title={t("account.title")}
       onClose={onClose}
       centerOnDesktop
     >
       <div className="space-y-4">
         <div className="rounded-2xl border border-[#eae4da] bg-white p-4">
           <p className="flex items-center gap-2 font-mono-field text-[9px] font-medium uppercase tracking-[0.13em] text-[#8a929d]">
-            <Mail size={13} className="text-[#e86a33]" /> E-mail cadastrado
+            <Mail size={13} className="text-[#e86a33]" /> {t("account.email")}
           </p>
           <p className="mt-1.5 break-all text-[15px] font-bold text-[#27374c]">
             {email}
           </p>
           {createdAt && (
             <p className="mt-2 text-[12px] text-[#8a929d]">
-              Conta criada em {formatLongDate(createdAt)}.
+              {t("account.createdAt", { date: d.long(createdAt) })}
             </p>
           )}
+        </div>
+
+        <div className="rounded-2xl border border-[#e8e2d7] bg-white p-4">
+          <p className="mb-2.5 flex items-center gap-2 font-mono-field text-[9px] font-medium uppercase tracking-[0.13em] text-[#8a929d]">
+            <Languages size={13} className="text-[#e86a33]" />{" "}
+            {t("account.language")}
+          </p>
+          <div className="grid grid-cols-3 gap-1 rounded-xl bg-[#f3f0e9] p-1">
+            {LANGUAGES.map(idioma => (
+              <button
+                key={idioma}
+                onClick={() => setLanguage(idioma)}
+                className={`h-9 rounded-lg text-[12px] font-bold transition ${
+                  !automatic && language === idioma
+                    ? "bg-white text-[#27374c] shadow-sm"
+                    : "text-[#87909b]"
+                }`}
+              >
+                {LANGUAGE_NAMES[idioma]}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setLanguage(null)}
+            className={`mt-2 w-full rounded-lg py-1.5 text-[12px] font-semibold transition ${
+              automatic ? "text-[#43825c]" : "text-[#8a929d]"
+            }`}
+          >
+            {automatic
+              ? `✓ ${t("account.languageAuto")}`
+              : t("account.languageAuto")}
+          </button>
         </div>
 
         <button
@@ -59,7 +95,7 @@ export function AccountSheet({
             <Building2 size={15} />
           </span>
           <span className="flex-1 text-sm font-bold text-[#354357]">
-            Equipe
+            {t("account.team")}
           </span>
           <ChevronRight size={17} className="text-[#b3bac3]" />
         </button>
@@ -70,8 +106,8 @@ export function AccountSheet({
             onSubmit={async (atual, nova) => {
               await updatePassword(atual, nova);
               setChanging(false);
-              toast.success("Senha alterada", {
-                description: "Use a nova senha da próxima vez que entrar.",
+              toast.success(t("account.changed"), {
+                description: t("account.changedHint"),
               });
             }}
           />
@@ -84,7 +120,7 @@ export function AccountSheet({
               <KeyRound size={15} />
             </span>
             <span className="flex-1 text-sm font-bold text-[#354357]">
-              Alterar senha
+              {t("account.changePassword")}
             </span>
           </button>
         )}
@@ -96,12 +132,11 @@ export function AccountSheet({
           }}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#f0ded4] bg-[#fff8f4] text-sm font-bold text-[#a8503a] transition active:scale-[0.98]"
         >
-          <LogOut size={16} /> Sair da conta
+          <LogOut size={16} /> {t("account.signOut")}
         </button>
 
         <p className="pb-1 text-center text-[12px] leading-5 text-[#8a929d]">
-          Sair não apaga nada. Suas obras continuam guardadas e voltam quando
-          você entrar de novo.
+          {t("account.signOutHint")}
         </p>
       </div>
     </BottomSheet>

@@ -10,7 +10,9 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { formatDayMonth, todayIso } from "@/lib/dates";
+import { todayIso } from "@/lib/dates";
+import { useT } from "@/i18n/I18nContext";
+import { useDates } from "@/i18n/useDates";
 import type { Work, WorkStatus } from "@/features/works/types";
 import { InstallBanner } from "@/features/pwa/InstallBanner";
 import { WorkCard } from "./WorkCard";
@@ -51,6 +53,8 @@ export function WorkList({
   /** Id de quem está usando o app, para marcar as obras de outra pessoa. */
   myId: string;
 }) {
+  const t = useT();
+  const d = useDates();
   return (
     <div className="app-enter min-h-screen px-4 pb-16 pt-7 sm:px-5">
       <header className="mb-7 flex items-center justify-between">
@@ -68,15 +72,15 @@ export function WorkList({
         <div className="flex items-center gap-3">
           <div className="text-right">
             <p className="font-mono-field text-[9px] uppercase tracking-[0.15em] text-[#8b9098]">
-              Hoje
+              {t("common.today")}
             </p>
             <p className="text-sm font-semibold text-[#3b4658]">
-              {formatDayMonth(todayIso())}
+              {d.dayMonth(todayIso())}
             </p>
           </div>
           <button
             onClick={onAccount}
-            aria-label="Sua conta"
+            aria-label={t("list.myAccount")}
             className="grid h-9 w-9 place-items-center rounded-full bg-[#f0ece4] text-[#5d6878] transition active:scale-90"
           >
             <UserRound size={16} />
@@ -89,15 +93,15 @@ export function WorkList({
           <CloudOff size={18} className="shrink-0 text-[#a97b26]" />
           <div className="min-w-0 flex-1">
             <p className="text-[13px] font-bold text-[#7c5a17]">
-              Sem conexão com o servidor
+              {t("list.offlineTitle")}
             </p>
             <p className="text-[12px] leading-4 text-[#8a7442]">
-              Mostrando as fichas salvas no aparelho. Não dá para editar agora.
+              {t("list.offlineBody")}
             </p>
           </div>
           <button
             onClick={onRefresh}
-            aria-label="Tentar conectar de novo"
+            aria-label={t("list.retry")}
             className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-[#7c5a17] shadow-sm transition active:scale-90"
           >
             <RefreshCw size={15} />
@@ -113,16 +117,16 @@ export function WorkList({
           size={18}
         />
         <input
-          aria-label="Buscar obra"
+          aria-label={t("list.searchLabel")}
           value={query}
           onChange={event => onQuery(event.target.value)}
-          placeholder="Ache a rua, cidade ou código"
+          placeholder={t("list.search")}
           className="h-12 w-full rounded-2xl border border-[#e7e1d7] bg-[#f3f0e9] pl-11 pr-11 text-[15px] font-medium outline-none transition focus:border-[#e86a33] focus:ring-4 focus:ring-[#f8d1bd]/50"
         />
         {query && (
           <button
             onClick={() => onQuery("")}
-            aria-label="Limpar busca"
+            aria-label={t("list.clearSearch")}
             className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-[#e3ded4] text-[#5d6878] transition active:scale-90"
           >
             <X size={14} />
@@ -133,16 +137,16 @@ export function WorkList({
       <div
         className="mb-6 grid grid-cols-2 rounded-2xl bg-[#eeeae1] p-1"
         role="tablist"
-        aria-label="Status das obras"
+        aria-label={t("list.tabsLabel")}
       >
         <StatusTab
-          label="Em andamento"
+          label={t("list.tabActive")}
           count={activeCount}
           active={tab === "active"}
           onClick={() => onTab("active")}
         />
         <StatusTab
-          label="Concluídos"
+          label={t("list.tabDone")}
           count={completedCount}
           active={tab === "completed"}
           onClick={() => onTab("completed")}
@@ -153,22 +157,24 @@ export function WorkList({
         onClick={onNew}
         className="mb-5 flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#d8d0c4] bg-[#f8f5ef] text-[13px] font-bold text-[#4f5d70] transition hover:border-[#e6ab8e] hover:bg-[#fff8f4] active:scale-[0.98]"
       >
-        <Plus size={16} className="text-[#e86a33]" /> Nova ficha
+        <Plus size={16} className="text-[#e86a33]" /> {t("list.newWork")}
       </button>
 
       <section aria-labelledby="works-heading">
         <div className="mb-3 flex items-end justify-between px-1">
           <div>
             <p className="field-rule w-max pb-1 font-mono-field text-[9px] font-medium uppercase tracking-[0.15em] text-[#8b9098]">
-              {tab === "active" ? "Fichas em campo" : "Fichas encerradas"}
+              {tab === "active" ? t("list.inField") : t("list.closed")}
             </p>
             <h2
               id="works-heading"
               className="mt-1 text-lg font-bold tracking-[-0.025em]"
             >
               {loading
-                ? "Carregando…"
-                : `${works.length} ${works.length === 1 ? "obra" : "obras"}`}
+                ? t("common.loading")
+                : works.length === 1
+                  ? t("list.countOne", { count: works.length })
+                  : t("list.countMany", { count: works.length })}
             </h2>
           </div>
           {!loading && works.length > 1 && (
@@ -176,12 +182,13 @@ export function WorkList({
               onClick={onOrganize}
               className="flex h-8 items-center gap-1.5 rounded-full bg-[#f3f0e9] px-3 text-[12px] font-bold text-[#4f5c6e] transition active:scale-95"
             >
-              <ArrowUpDown size={14} className="text-[#e86a33]" /> Organizar
+              <ArrowUpDown size={14} className="text-[#e86a33]" />{" "}
+              {t("list.organize")}
             </button>
           )}
           {tab === "active" && !loading && works.length === 1 && (
             <span className="rounded-full bg-[#f8d1bd] px-2.5 py-1 font-mono-field text-[9px] font-medium tracking-[0.09em] text-[#944120]">
-              EM CAMPO
+              {t("list.inFieldChip")}
             </span>
           )}
         </div>
@@ -260,13 +267,14 @@ function EmptyState({
   tab: WorkStatus;
   onNew: () => void;
 }) {
+  const t = useT();
   if (searching) {
     return (
       <div className="rounded-3xl border border-dashed border-[#d7d0c4] px-6 py-14 text-center">
         <Search className="mx-auto mb-3 text-[#9da3ab]" size={24} />
-        <p className="font-semibold">Nenhuma obra encontrada</p>
+        <p className="font-semibold">{t("list.emptySearch")}</p>
         <p className="mt-1 text-sm text-[#737d8d]">
-          Tente outra rua, cidade ou código.
+          {t("list.emptySearchHint")}
         </p>
       </div>
     );
@@ -275,10 +283,8 @@ function EmptyState({
   if (tab === "completed") {
     return (
       <div className="rounded-3xl border border-dashed border-[#d7d0c4] px-6 py-14 text-center">
-        <p className="font-semibold">Nenhuma obra concluída ainda</p>
-        <p className="mt-1 text-sm text-[#737d8d]">
-          As fichas encerradas aparecem aqui.
-        </p>
+        <p className="font-semibold">{t("list.emptyDone")}</p>
+        <p className="mt-1 text-sm text-[#737d8d]">{t("list.emptyDoneHint")}</p>
       </div>
     );
   }
@@ -286,16 +292,15 @@ function EmptyState({
   return (
     <div className="rounded-3xl border border-dashed border-[#d7d0c4] px-6 py-12 text-center">
       <House className="mx-auto mb-3 text-[#c0a795]" size={26} />
-      <p className="font-semibold">Nenhuma obra em campo</p>
+      <p className="font-semibold">{t("list.emptyActive")}</p>
       <p className="mx-auto mt-1 max-w-[280px] text-sm text-[#737d8d]">
-        Crie a primeira ficha com endereço, código de entrada e o que precisa
-        ser feito.
+        {t("list.emptyActiveHint")}
       </p>
       <button
         onClick={onNew}
         className="mx-auto mt-4 flex h-11 items-center gap-2 rounded-xl bg-[#27374c] px-4 text-sm font-bold text-white transition active:scale-[0.98]"
       >
-        <Plus size={16} className="text-[#ffb28e]" /> Nova ficha
+        <Plus size={16} className="text-[#ffb28e]" /> {t("list.newWork")}
       </button>
     </div>
   );

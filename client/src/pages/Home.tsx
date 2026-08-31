@@ -12,6 +12,7 @@ import { useWorks } from "@/features/works/useWorks";
 import { AccountSheet } from "@/features/auth/AccountSheet";
 import { ShareSheet } from "@/features/works/components/ShareSheet";
 import { useCompany } from "@/features/company/useCompany";
+import { useT } from "@/i18n/I18nContext";
 import { CompanySheet } from "@/features/company/CompanySheet";
 import type { Work, WorkStatus } from "@/features/works/types";
 
@@ -19,6 +20,7 @@ type FormState = { kind: "new" } | { kind: "edit"; workId: string };
 type Confirmation = { kind: "complete" | "delete"; workId: string };
 
 export default function Home() {
+  const t = useT();
   const { company } = useCompany();
   const works = useWorks(company?.id ?? null);
   const [tab, setTab] = useState<WorkStatus>("active");
@@ -64,7 +66,7 @@ export default function Home() {
     if (formState?.kind === "edit" && editingWork) {
       works.editWork(editingWork.id, input);
       setFormState(null);
-      toast.success("Ficha atualizada");
+      toast.success(t("toast.workUpdated"));
       return;
     }
     const created = works.createWork(input, firstTask);
@@ -72,7 +74,7 @@ export default function Home() {
     setTab("active");
     setQuery("");
     setOpenWorkId(created.id);
-    toast.success("Ficha criada");
+    toast.success(t("toast.workCreated"));
   }
 
   function handleConfirm() {
@@ -81,13 +83,13 @@ export default function Home() {
       works.completeWork(confirmationWork.id);
       setTab("completed");
       setOpenWorkId(null);
-      toast.success("Obra concluída", {
-        description: "Ela foi movida para Concluídos.",
+      toast.success(t("toast.workCompleted"), {
+        description: t("toast.workCompletedHint"),
       });
     } else {
       void works.removeWork(confirmationWork.id);
       setOpenWorkId(null);
-      toast.success("Ficha apagada");
+      toast.success(t("toast.workDeleted"));
     }
     setConfirmation(null);
   }
@@ -98,7 +100,11 @@ export default function Home() {
         {organizing ? (
           <ReorderList
             works={filteredWorks}
-            label={tab === "active" ? "em andamento" : "concluídos"}
+            label={
+              tab === "active"
+                ? t("reorder.groupActive")
+                : t("reorder.groupDone")
+            }
             onSave={works.reorderWorks}
             onCancel={() => setOrganizing(false)}
           />
@@ -118,7 +124,7 @@ export default function Home() {
             onReopen={() => {
               works.reopenWork(openWork.id);
               setTab("active");
-              toast.success("Obra reaberta");
+              toast.success(t("toast.workReopened"));
             }}
             onDelete={() =>
               setConfirmation({ kind: "delete", workId: openWork.id })
@@ -206,16 +212,18 @@ export default function Home() {
         <ConfirmSheet
           title={
             confirmation.kind === "complete"
-              ? "Concluir esta obra?"
-              : "Apagar esta ficha?"
+              ? t("confirm.completeTitle")
+              : t("confirm.deleteTitle")
           }
           message={
             confirmation.kind === "complete"
-              ? `${confirmationWork.street} será movida para Concluídos. Você pode reabrir depois.`
-              : `${confirmationWork.street} será apagada com fotos, tarefas e atualizações. Isso não pode ser desfeito.`
+              ? t("confirm.completeBody", { street: confirmationWork.street })
+              : t("confirm.deleteBody", { street: confirmationWork.street })
           }
           confirmLabel={
-            confirmation.kind === "complete" ? "Concluir" : "Apagar"
+            confirmation.kind === "complete"
+              ? t("confirm.complete")
+              : t("confirm.delete")
           }
           tone={confirmation.kind === "delete" ? "danger" : "neutral"}
           onConfirm={handleConfirm}

@@ -1,3 +1,17 @@
+# Atualização: interface em três idiomas (31 ago 2026)
+
+- [x] Português, inglês e espanhol, detectados pelo idioma do aparelho.
+- [x] Troca manual em Conta > Idioma, com opção de voltar ao automático.
+- [x] Dicionário com o português como referência: esquecer uma chave em outro
+      idioma vira erro de compilação, não texto faltando na tela.
+- [x] Datas no idioma certo, inclusive a ordem (Aug 31 x 31 ago) e as frases
+      de duração ("1 dia de obra" / "1 day on the job" / "1 día de obra").
+- [x] Conferido na tela nos três idiomas.
+
+## Pendente: traduzir o que vocês escrevem
+As tarefas, descrições e observações continuam no idioma de quem escreveu.
+Isso precisa de um serviço de tradução — ver conversa.
+
 # Em andamento: compartilhamento entre a equipe (31 ago 2026)
 
 Modelo escolhido: toda obra é privada de quem criou. Quem criou decide

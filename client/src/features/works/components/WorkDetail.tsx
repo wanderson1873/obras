@@ -28,12 +28,9 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import {
-  formatDuration,
-  formatLongDate,
-  formatRelativeDay,
-  formatShortDate,
-} from "@/lib/dates";
+import { useT } from "@/i18n/I18nContext";
+import { useDates } from "@/i18n/useDates";
+import type { TranslationKey } from "@/i18n/translations";
 import type { Work } from "@/features/works/types";
 import { usePhotoPicker } from "./usePhotoPicker";
 
@@ -63,13 +60,16 @@ export function WorkDetail({
   work,
   ...actions
 }: { work: Work } & DetailActions) {
+  const t = useT();
+  const d = useDates();
   const [newTask, setNewTask] = useState("");
   const [newUpdate, setNewUpdate] = useState("");
   const doneCount = work.tasks.filter(task => task.done).length;
   const compartilhamento = describeSharing(
     work,
     actions.isMine,
-    actions.sharedCount
+    actions.sharedCount,
+    t
   );
   const picker = usePhotoPicker(actions.onAddPhotos);
 
@@ -83,8 +83,10 @@ export function WorkDetail({
         <header className="mb-5">
           <p className="font-mono-field text-[10px] font-medium uppercase tracking-[0.16em] text-[#e86a33]">
             {work.status === "active"
-              ? "Em andamento"
-              : `Concluída${work.completedAt ? ` · ${formatShortDate(work.completedAt)}` : ""}`}
+              ? t("detail.statusActive")
+              : work.completedAt
+                ? t("detail.statusDoneOn", { date: d.short(work.completedAt) })
+                : t("detail.statusDone")}
           </p>
           <h1 className="mt-1 text-[29px] font-bold leading-tight tracking-[-0.055em] text-[#27374c]">
             {work.street}
@@ -94,10 +96,10 @@ export function WorkDetail({
             {work.zip && ` · ${work.zip}`}
           </p>
           <p className="mt-1.5 flex items-center gap-1.5 font-mono-field text-[10px] font-medium uppercase tracking-[0.08em] text-[#8a929d]">
-            <CalendarDays size={13} /> Iniciada em{" "}
-            {formatLongDate(work.startDate)}
+            <CalendarDays size={13} />{" "}
+            {t("detail.startedOn", { date: d.long(work.startDate) })}
             <span className="text-[#b0a59a]">·</span>{" "}
-            {formatDuration(work.startDate)}
+            {d.duration(work.startDate)}
           </p>
         </header>
 
@@ -112,7 +114,7 @@ export function WorkDetail({
         {work.code && (
           <section className="mb-7 rounded-[22px] border border-[#f0ded4] bg-[#fff8f4] p-4">
             <p className="mb-2 flex items-center gap-2 font-mono-field text-[10px] font-medium uppercase tracking-[0.13em] text-[#a75a3b]">
-              <DoorOpen size={14} /> Código de acesso
+              <DoorOpen size={14} /> {t("detail.accessCode")}
             </p>
             <div className="font-mono-field text-[32px] font-medium leading-none tracking-[0.18em] text-[#27374c]">
               {work.code}
@@ -121,7 +123,10 @@ export function WorkDetail({
         )}
 
         <section className="mb-7">
-          <SectionHeading icon={<Share2 size={16} />} label="Quem enxerga" />
+          <SectionHeading
+            icon={<Share2 size={16} />}
+            label={t("detail.whoSees")}
+          />
           <div className="mt-3 flex items-center gap-3 rounded-2xl border border-[#eae4da] bg-white px-4 py-3">
             <span className="shrink-0 text-[#e86a33]">
               {compartilhamento.icon}
@@ -139,7 +144,7 @@ export function WorkDetail({
                 onClick={actions.onShare}
                 className="shrink-0 rounded-xl bg-[#f3f0e9] px-3 py-2 text-[12px] font-bold text-[#4f5c6e] transition active:scale-95"
               >
-                Mudar
+                {t("common.change")}
               </button>
             )}
           </div>
@@ -148,17 +153,17 @@ export function WorkDetail({
         <section className="mb-7">
           <SectionHeading
             icon={<House size={16} />}
-            label="Condições do local"
+            label={t("detail.conditions")}
           />
           <div className="mt-3 overflow-hidden rounded-2xl border border-[#eae4da] bg-white">
             <AvailabilityRow
               icon={<Droplets size={17} />}
-              label="Água"
+              label={t("detail.water")}
               available={work.waterAvailable}
             />
             <AvailabilityRow
               icon={<Zap size={17} />}
-              label="Energia elétrica"
+              label={t("detail.power")}
               available={work.powerAvailable}
               last
             />
@@ -166,7 +171,7 @@ export function WorkDetail({
         </section>
 
         <section className="mb-7">
-          <SectionHeading icon={<House size={16} />} label="Trabalho" />
+          <SectionHeading icon={<House size={16} />} label={t("detail.work")} />
           <div className="mt-3 rounded-2xl bg-[#f3f0e9] px-4 py-3.5">
             <p className="text-[14px] font-bold text-[#3e4b5d]">
               {work.service}
@@ -181,7 +186,10 @@ export function WorkDetail({
 
         <section className="mb-7">
           <div className="mb-3 flex items-center justify-between">
-            <SectionHeading icon={<CheckCircle2 size={16} />} label="Tarefas" />
+            <SectionHeading
+              icon={<CheckCircle2 size={16} />}
+              label={t("detail.tasks")}
+            />
             <span className="font-mono-field text-[10px] text-[#7d8794]">
               {doneCount}/{work.tasks.length}
             </span>
@@ -198,8 +206,8 @@ export function WorkDetail({
                     onClick={() => actions.onToggleTask(task.id)}
                     aria-label={
                       task.done
-                        ? `Desmarcar ${task.label}`
-                        : `Concluir ${task.label}`
+                        ? t("detail.uncheckTask", { task: task.label })
+                        : t("detail.checkTask", { task: task.label })
                     }
                     className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border transition active:scale-90 ${task.done ? "border-[#599875] bg-[#599875] text-white" : "border-[#cfd3d4] bg-white"}`}
                   >
@@ -212,7 +220,7 @@ export function WorkDetail({
                   </span>
                   <button
                     onClick={() => actions.onRemoveTask(task.id)}
-                    aria-label={`Remover ${task.label}`}
+                    aria-label={t("detail.removeTask", { task: task.label })}
                     className="p-1 opacity-60 transition hover:opacity-100 focus:opacity-100"
                   >
                     <Trash2 size={15} className="text-[#b5a29a]" />
@@ -229,21 +237,27 @@ export function WorkDetail({
               actions.onAddTask(newTask);
               setNewTask("");
             }}
-            placeholder="Adicionar tarefa"
+            placeholder={t("detail.addTask")}
             action={<Plus size={19} />}
           />
         </section>
 
         <section className="mb-7">
-          <SectionHeading icon={<Edit3 size={16} />} label="Observações" />
+          <SectionHeading
+            icon={<Edit3 size={16} />}
+            label={t("detail.notes")}
+          />
           <p className="mt-3 rounded-2xl bg-[#f3f0e9] px-4 py-3.5 text-[14px] leading-6 text-[#637084]">
-            {work.observations || "Nenhuma observação adicionada."}
+            {work.observations || t("detail.noNotes")}
           </p>
         </section>
 
         <section className="mb-7">
           <div className="mb-3 flex items-center justify-between">
-            <SectionHeading icon={<Camera size={16} />} label="Fotos" />
+            <SectionHeading
+              icon={<Camera size={16} />}
+              label={t("detail.photos")}
+            />
             <button
               onClick={picker.open}
               disabled={picker.busy}
@@ -254,7 +268,7 @@ export function WorkDetail({
               ) : (
                 <ImagePlus size={15} />
               )}{" "}
-              Adicionar
+              {t("common.add")}
             </button>
           </div>
 
@@ -263,20 +277,23 @@ export function WorkDetail({
               <figure key={photo.id} className="group relative shrink-0">
                 <img
                   src={photo.url}
-                  alt={`Registro ${index + 1} de ${work.street}`}
+                  alt={t("detail.photoAlt", {
+                    number: index + 1,
+                    street: work.street,
+                  })}
                   loading="lazy"
                   className="h-20 w-28 rounded-xl object-cover"
                 />
                 {index === 0 && (
                   <figcaption className="absolute bottom-1 left-1 rounded bg-[#27374c]/80 px-1.5 py-0.5 font-mono-field text-[8px] uppercase tracking-[0.1em] text-white">
-                    Capa
+                    {t("detail.cover")}
                   </figcaption>
                 )}
                 <div className="absolute right-1 top-1 flex gap-1">
                   {index !== 0 && (
                     <button
                       onClick={() => actions.onSetCover(index)}
-                      aria-label="Usar como capa"
+                      aria-label={t("detail.useAsCover")}
                       className="grid h-6 w-6 place-items-center rounded-full bg-white/90 text-[#5d6878] shadow-sm transition active:scale-90"
                     >
                       <Star size={12} />
@@ -284,7 +301,7 @@ export function WorkDetail({
                   )}
                   <button
                     onClick={() => actions.onRemovePhoto(index)}
-                    aria-label={`Remover foto ${index + 1}`}
+                    aria-label={t("detail.removePhoto", { number: index + 1 })}
                     className="grid h-6 w-6 place-items-center rounded-full bg-white/90 text-[#a8503a] shadow-sm transition active:scale-90"
                   >
                     <X size={12} />
@@ -296,7 +313,7 @@ export function WorkDetail({
             <button
               onClick={picker.open}
               disabled={picker.busy}
-              aria-label="Adicionar foto"
+              aria-label={t("detail.addPhoto")}
               className="grid h-20 w-24 shrink-0 place-items-center rounded-xl border border-dashed border-[#cfc7bc] bg-[#f8f5ef] text-[#9a948b] disabled:opacity-60"
             >
               {picker.busy ? (
@@ -309,7 +326,10 @@ export function WorkDetail({
         </section>
 
         <section className="mb-7">
-          <SectionHeading icon={<History size={16} />} label="Atualizações" />
+          <SectionHeading
+            icon={<History size={16} />}
+            label={t("detail.updates")}
+          />
           <div className="mt-3">
             {work.updates.map((update, index) => (
               <div
@@ -318,7 +338,7 @@ export function WorkDetail({
               >
                 <div className="flex w-[52px] shrink-0 flex-col items-center">
                   <span className="font-mono-field text-[10px] text-[#7d8794]">
-                    {formatRelativeDay(update.date)}
+                    {d.relativeDay(update.date)}
                   </span>
                   {index < work.updates.length - 1 && (
                     <span className="mt-2 h-full border-l border-dashed border-[#cbd0d5]" />
@@ -330,7 +350,7 @@ export function WorkDetail({
                   </p>
                   <button
                     onClick={() => actions.onRemoveUpdate(update.id)}
-                    aria-label="Remover atualização"
+                    aria-label={t("detail.removeUpdate")}
                     className="shrink-0 p-0.5 opacity-60 transition hover:opacity-100 focus:opacity-100"
                   >
                     <Trash2 size={14} className="text-[#b5a29a]" />
@@ -340,7 +360,7 @@ export function WorkDetail({
             ))}
             {!work.updates.length && (
               <p className="rounded-2xl bg-[#f3f0e9] px-4 py-3.5 text-[13px] text-[#78828f]">
-                Nenhuma atualização registrada.
+                {t("detail.noUpdates")}
               </p>
             )}
           </div>
@@ -352,8 +372,8 @@ export function WorkDetail({
               actions.onAddUpdate(newUpdate);
               setNewUpdate("");
             }}
-            placeholder="Nova atualização"
-            action="Registrar"
+            placeholder={t("detail.newUpdate")}
+            action={t("detail.register")}
           />
         </section>
 
@@ -361,7 +381,7 @@ export function WorkDetail({
           <section className="mb-8">
             <SectionHeading
               icon={<History size={16} />}
-              label="Trabalhos anteriores neste endereço"
+              label={t("detail.history")}
             />
             <div className="mt-3 overflow-hidden rounded-2xl border border-[#eae4da] bg-white">
               {work.history.map((entry, index) => (
@@ -370,7 +390,7 @@ export function WorkDetail({
                   className={`flex items-center justify-between gap-4 px-4 py-3 ${index < work.history.length - 1 ? "border-b border-[#f1ece3]" : ""}`}
                 >
                   <span className="font-mono-field text-[10px] text-[#7d8794]">
-                    {formatShortDate(entry.date)}
+                    {d.short(entry.date)}
                   </span>
                   <span className="flex-1 text-right text-[13px] font-semibold text-[#536174]">
                     {entry.title}
@@ -387,14 +407,14 @@ export function WorkDetail({
               onClick={actions.onComplete}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#b8ddc5] bg-[#f2faf4] text-sm font-bold text-[#3d7e58] transition active:scale-[0.98]"
             >
-              <CheckCircle2 size={17} /> Marcar como concluída
+              <CheckCircle2 size={17} /> {t("detail.complete")}
             </button>
           ) : (
             <button
               onClick={actions.onReopen}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#dfd7ca] bg-white text-sm font-bold text-[#4d5b6e] transition active:scale-[0.98]"
             >
-              <RotateCcw size={16} /> Reabrir obra
+              <RotateCcw size={16} /> {t("detail.reopen")}
             </button>
           )}
 
@@ -403,7 +423,7 @@ export function WorkDetail({
               onClick={actions.onDelete}
               className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl text-[13px] font-bold text-[#a8503a] transition active:scale-[0.98]"
             >
-              <Trash2 size={15} /> Apagar ficha
+              <Trash2 size={15} /> {t("detail.deleteWork")}
             </button>
           )}
         </div>
@@ -413,19 +433,24 @@ export function WorkDetail({
 }
 
 /** Frase que descreve o compartilhamento atual da obra. */
-function describeSharing(work: Work, isMine: boolean, sharedCount: number) {
+function describeSharing(
+  work: Work,
+  isMine: boolean,
+  sharedCount: number,
+  t: (key: TranslationKey, values?: Record<string, string | number>) => string
+) {
   if (!isMine) {
     return {
       icon: <UserRound size={17} />,
-      title: "Compartilhada com você",
-      description: "Você pode editar e registrar o andamento, mas não apagar.",
+      title: t("detail.sharedWithYou"),
+      description: t("detail.sharedWithYouHint"),
     };
   }
   if (work.shareScope === "company") {
     return {
       icon: <Building2 size={17} />,
-      title: "Toda a equipe",
-      description: "Quem entrar na equipe depois também vai enxergar.",
+      title: t("detail.shareTeam"),
+      description: t("detail.shareTeamHint"),
     };
   }
   if (work.shareScope === "selected") {
@@ -433,15 +458,15 @@ function describeSharing(work: Work, isMine: boolean, sharedCount: number) {
       icon: <Share2 size={17} />,
       title:
         sharedCount === 1
-          ? "Compartilhada com 1 pessoa"
-          : `Compartilhada com ${sharedCount} pessoas`,
-      description: "Só quem você escolheu enxerga esta obra.",
+          ? t("detail.shareOne")
+          : t("detail.shareMany", { count: sharedCount }),
+      description: t("detail.shareSelectedHint"),
     };
   }
   return {
     icon: <Lock size={17} />,
-    title: "Só você",
-    description: "Ninguém mais da equipe enxerga esta obra.",
+    title: t("detail.sharePrivate"),
+    description: t("detail.sharePrivateHint"),
   };
 }
 
@@ -454,6 +479,7 @@ function Gallery({
   onBack: () => void;
   onEdit: () => void;
 }) {
+  const t = useT();
   const [index, setIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -475,7 +501,10 @@ function Gallery({
             <img
               key={photo.id}
               src={photo.url}
-              alt={`Foto ${position + 1} de ${work.street}`}
+              alt={t("detail.galleryAlt", {
+                number: position + 1,
+                street: work.street,
+              })}
               className="h-full w-full shrink-0 snap-center object-cover"
             />
           ))}
@@ -494,7 +523,7 @@ function Gallery({
       <button
         onClick={onBack}
         className="absolute left-4 top-5 grid h-10 w-10 place-items-center rounded-full bg-white/92 text-[#27374c] shadow-sm transition active:scale-95"
-        aria-label="Voltar para a lista"
+        aria-label={t("detail.back")}
       >
         <ArrowLeft size={19} />
       </button>
@@ -502,7 +531,7 @@ function Gallery({
         onClick={onEdit}
         className="absolute right-4 top-5 flex h-10 items-center gap-1.5 rounded-full bg-white/92 px-3 text-xs font-bold text-[#27374c] shadow-sm transition active:scale-95"
       >
-        <Edit3 size={14} /> Editar
+        <Edit3 size={14} /> {t("detail.edit")}
       </button>
 
       {work.photos.length > 1 && (
@@ -592,6 +621,7 @@ function AvailabilityRow({
   available: boolean;
   last?: boolean;
 }) {
+  const t = useT();
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 ${last ? "" : "border-b border-[#f1ece3]"}`}
@@ -605,7 +635,7 @@ function AvailabilityRow({
       <span
         className={`rounded-full px-2.5 py-1 font-mono-field text-[9px] font-medium uppercase tracking-[0.08em] ${available ? "bg-[#edf8f0] text-[#43825c]" : "bg-[#fff0e8] text-[#a74b29]"}`}
       >
-        {available ? "Disponível" : "Indisponível"}
+        {available ? t("detail.available") : t("detail.unavailable")}
       </span>
     </div>
   );

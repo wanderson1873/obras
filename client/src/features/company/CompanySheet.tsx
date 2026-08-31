@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { BottomSheet } from "@/features/works/components/BottomSheet";
 import { useAuth } from "@/features/auth/AuthContext";
+import { useT } from "@/i18n/I18nContext";
 import { useCompany } from "./useCompany";
 import type { MemberRole } from "./types";
 
@@ -26,13 +27,14 @@ export function CompanySheet({ onClose }: { onClose: () => void }) {
     removeMember,
   } = useCompany();
   const { session } = useAuth();
+  const t = useT();
   const meuId = session?.user.id;
 
   return (
     <BottomSheet
-      label="Equipe"
-      eyebrow="Equipe"
-      title={company?.name ?? "Sua equipe"}
+      label={t("team.eyebrow")}
+      eyebrow={t("team.eyebrow")}
+      title={company?.name ?? t("team.title")}
       onClose={onClose}
       centerOnDesktop
     >
@@ -58,18 +60,22 @@ export function CompanySheet({ onClose }: { onClose: () => void }) {
                     {membro.displayName}
                     {membro.userId === meuId && (
                       <span className="ml-1.5 text-[12px] font-medium text-[#8a929d]">
-                        (você)
+                        ({t("common.you")})
                       </span>
                     )}
                   </span>
                   <span className="font-mono-field text-[9px] uppercase tracking-[0.1em] text-[#8a929d]">
-                    {membro.role === "admin" ? "Administrador" : "Equipe"}
+                    {membro.role === "admin"
+                      ? t("team.roleAdmin")
+                      : t("team.roleMember")}
                   </span>
                 </span>
                 {company.myRole === "admin" && membro.userId !== meuId && (
                   <button
                     onClick={() => void removeMember(membro.userId)}
-                    aria-label={`Remover ${membro.displayName} da equipe`}
+                    aria-label={t("team.removeLabel", {
+                      name: membro.displayName,
+                    })}
                     className="p-1 opacity-60 transition hover:opacity-100"
                   >
                     <Trash2 size={15} className="text-[#b5a29a]" />
@@ -82,7 +88,7 @@ export function CompanySheet({ onClose }: { onClose: () => void }) {
           {company.pendingInvites.length > 0 && (
             <section>
               <p className="mb-2 font-mono-field text-[9px] font-medium uppercase tracking-[0.13em] text-[#8a929d]">
-                Convites aguardando
+                {t("team.pendingInvites")}
               </p>
               <ul className="space-y-2">
                 {company.pendingInvites.map(convite => (
@@ -96,7 +102,9 @@ export function CompanySheet({ onClose }: { onClose: () => void }) {
                     </span>
                     <button
                       onClick={() => void cancelInvite(convite.id)}
-                      aria-label={`Cancelar convite de ${convite.email}`}
+                      aria-label={t("team.cancelInviteLabel", {
+                        email: convite.email,
+                      })}
                       className="p-1 opacity-60 transition hover:opacity-100"
                     >
                       <Trash2 size={14} className="text-[#b5a29a]" />
@@ -105,8 +113,7 @@ export function CompanySheet({ onClose }: { onClose: () => void }) {
                 ))}
               </ul>
               <p className="mt-2 text-[12px] leading-5 text-[#8a929d]">
-                A pessoa entra na equipe sozinha assim que criar a conta com
-                esse e-mail.
+                {t("team.pendingHint")}
               </p>
             </section>
           )}
@@ -115,7 +122,7 @@ export function CompanySheet({ onClose }: { onClose: () => void }) {
             <InviteForm onInvite={invite} />
           ) : (
             <p className="rounded-xl bg-[#f3f0e9] px-3.5 py-3 text-[12px] leading-5 text-[#6b7686]">
-              Só o administrador da equipe pode convidar ou remover pessoas.
+              {t("team.onlyAdmin")}
             </p>
           )}
         </div>
@@ -129,25 +136,24 @@ function CreateCompanyForm({
 }: {
   onCreate: (name: string) => Promise<void>;
 }) {
+  const t = useT();
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!name.trim()) return setError("Escreva o nome da empresa.");
+    if (!name.trim()) return setError(t("team.typeCompanyName"));
     setError(null);
     setBusy(true);
     try {
       await onCreate(name);
-      toast.success("Equipe criada", {
-        description: "Agora convide as outras pessoas.",
+      toast.success(t("team.created"), {
+        description: t("team.createdHint"),
       });
     } catch (caught) {
       setError(
-        caught instanceof Error
-          ? caught.message
-          : "Não foi possível criar a equipe."
+        caught instanceof Error ? caught.message : t("team.createFailed")
       );
     } finally {
       setBusy(false);
@@ -157,14 +163,12 @@ function CreateCompanyForm({
   return (
     <form onSubmit={submit} className="space-y-4">
       <p className="text-[14px] leading-6 text-[#647084]">
-        Crie a equipe para poder compartilhar obras. Suas obras de hoje
-        continuam privadas — nada passa a ser visto por ninguém sem você
-        escolher.
+        {t("team.createIntro")}
       </p>
 
       <label className="block">
         <span className="mb-1.5 block text-[12px] font-bold text-[#526073]">
-          Nome da empresa
+          {t("team.companyName")}
         </span>
         <input
           value={name}
@@ -193,7 +197,7 @@ function CreateCompanyForm({
         ) : (
           <Building2 size={17} />
         )}{" "}
-        Criar equipe
+        {t("team.create")}
       </button>
     </form>
   );
@@ -204,6 +208,7 @@ function InviteForm({
 }: {
   onInvite: (email: string, role: MemberRole) => Promise<void>;
 }) {
+  const t = useT();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<MemberRole>("member");
   const [busy, setBusy] = useState(false);
@@ -211,18 +216,18 @@ function InviteForm({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!email.trim()) return setError("Escreva o e-mail da pessoa.");
+    if (!email.trim()) return setError(t("team.typeEmail"));
     setError(null);
     setBusy(true);
     try {
       await onInvite(email, role);
       setEmail("");
-      toast.success("Convite criado", {
-        description: "Peça para a pessoa criar a conta com esse e-mail.",
+      toast.success(t("team.inviteCreated"), {
+        description: t("team.inviteCreatedHint"),
       });
     } catch (caught) {
       setError(
-        caught instanceof Error ? caught.message : "Não foi possível convidar."
+        caught instanceof Error ? caught.message : t("team.inviteFailed")
       );
     } finally {
       setBusy(false);
@@ -235,7 +240,7 @@ function InviteForm({
       className="space-y-3 rounded-2xl border border-[#e8e2d7] bg-white p-4"
     >
       <p className="flex items-center gap-2 font-mono-field text-[9px] font-medium uppercase tracking-[0.13em] text-[#8a929d]">
-        <UserPlus size={13} className="text-[#e86a33]" /> Convidar para a equipe
+        <UserPlus size={13} className="text-[#e86a33]" /> {t("team.invite")}
       </p>
 
       <input
@@ -243,7 +248,7 @@ function InviteForm({
         inputMode="email"
         value={email}
         onChange={event => setEmail(event.target.value)}
-        placeholder="email@exemplo.com"
+        placeholder={t("team.invitePlaceholder")}
         className="h-11 w-full rounded-xl border border-[#e4ded3] bg-white px-3 text-sm outline-none transition focus:border-[#e86a33]"
       />
 
@@ -253,19 +258,18 @@ function InviteForm({
           onClick={() => setRole("member")}
           className={`h-9 rounded-lg text-[12px] font-bold transition ${role === "member" ? "bg-white text-[#27374c] shadow-sm" : "text-[#87909b]"}`}
         >
-          Equipe
+          {t("team.roleMember")}
         </button>
         <button
           type="button"
           onClick={() => setRole("admin")}
           className={`h-9 rounded-lg text-[12px] font-bold transition ${role === "admin" ? "bg-white text-[#27374c] shadow-sm" : "text-[#87909b]"}`}
         >
-          Administrador
+          {t("team.roleAdmin")}
         </button>
       </div>
       <p className="text-[11px] leading-4 text-[#8a929d]">
-        Administrador convida e remove pessoas. Isso não dá acesso às obras de
-        ninguém.
+        {t("team.adminHint")}
       </p>
 
       {error && (
@@ -287,7 +291,7 @@ function InviteForm({
         ) : (
           <Check size={15} />
         )}{" "}
-        Convidar
+        {t("team.inviteAction")}
       </button>
     </form>
   );

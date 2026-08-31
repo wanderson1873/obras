@@ -4,6 +4,7 @@ import { Copy, ExternalLink, Navigation } from "lucide-react";
 import { toast } from "sonner";
 import { fullAddress, navigationApps, openRoute } from "@/lib/navigation";
 import type { Work } from "@/features/works/types";
+import { useT } from "@/i18n/I18nContext";
 import { BottomSheet } from "./BottomSheet";
 
 export function NavigationSheet({
@@ -13,22 +14,23 @@ export function NavigationSheet({
   work: Work;
   onClose: () => void;
 }) {
+  const t = useT();
   const address = fullAddress(work);
   const apps = navigationApps();
 
   async function copyAddress() {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("Endereço copiado");
+      toast.success(t("nav.copied"));
     } catch {
-      toast.error("Não foi possível copiar o endereço.");
+      toast.error(t("nav.copyFailed"));
     }
   }
 
   return (
     <BottomSheet
-      label="Escolher aplicativo de navegação"
-      eyebrow="Abrir rota"
+      label={t("nav.label")}
+      eyebrow={t("nav.eyebrow")}
       title={work.street}
       subtitle={[work.city, work.zip].filter(Boolean).join(" · ")}
       onClose={onClose}
@@ -63,7 +65,7 @@ export function NavigationSheet({
             <Copy size={15} />
           </span>
           <span className="flex-1 text-sm font-bold text-[#354357]">
-            Copiar endereço
+            {t("nav.copyAddress")}
           </span>
         </button>
       </div>

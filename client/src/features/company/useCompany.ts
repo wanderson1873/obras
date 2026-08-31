@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { useT } from "@/i18n/I18nContext";
 import type {
   Company,
   CompanyInvite,
@@ -35,6 +36,7 @@ function toMember(row: {
 }
 
 export function useCompany() {
+  const t = useT();
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -110,7 +112,7 @@ export function useCompany() {
 
   const invite = useCallback(
     async (email: string, role: MemberRole) => {
-      if (!company) throw new Error("Crie a empresa antes de convidar alguém.");
+      if (!company) throw new Error(t("team.noCompanyYet"));
       const { error } = await supabase.from("company_invites").insert({
         company_id: company.id,
         email: email.trim().toLowerCase(),
@@ -119,13 +121,12 @@ export function useCompany() {
       });
       if (error) {
         // Chave única no par (empresa, e-mail): convite repetido cai aqui.
-        if (error.code === "23505")
-          throw new Error("Esse e-mail já foi convidado.");
+        if (error.code === "23505") throw new Error(t("team.inviteDuplicate"));
         throw error;
       }
       await load();
     },
-    [company, load]
+    [company, load, t]
   );
 
   const cancelInvite = useCallback(
@@ -150,11 +151,11 @@ export function useCompany() {
         .eq("user_id", userId);
       if (error) throw error;
       await load();
-      toast.success("Pessoa removida da equipe", {
-        description: "As obras que ela criou continuam com ela.",
+      toast.success(t("team.removed"), {
+        description: t("team.removedHint"),
       });
     },
-    [company, load]
+    [company, load, t]
   );
 
   return {

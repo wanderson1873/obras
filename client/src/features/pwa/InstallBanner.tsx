@@ -7,10 +7,12 @@ import { useState } from "react";
 import { Download, Share, SquarePlus, X } from "lucide-react";
 import { BottomSheet } from "@/features/works/components/BottomSheet";
 import { usePwaInstall } from "./usePwaInstall";
+import { useT } from "@/i18n/I18nContext";
 
 export function InstallBanner() {
   const { installed, ios, canInstall, dismissed, install, dismiss } =
     usePwaInstall();
+  const t = useT();
   const [showIosSteps, setShowIosSteps] = useState(false);
 
   // No iPhone não existe prompt, então o convite aparece mesmo sem evento do navegador.
@@ -28,21 +30,21 @@ export function InstallBanner() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-bold text-[#8f4526]">
-            Instalar o Obras no celular
+            {t("pwa.installTitle")}
           </p>
           <p className="text-[12px] leading-4 text-[#a27053]">
-            Abre direto pelo ícone, sem procurar a aba do navegador.
+            {t("pwa.installBody")}
           </p>
         </div>
         <button
           onClick={() => (ios ? setShowIosSteps(true) : void install())}
           className="h-9 shrink-0 rounded-xl bg-[#e86a33] px-3 text-[12px] font-bold text-white transition active:scale-95"
         >
-          Instalar
+          {t("pwa.install")}
         </button>
         <button
           onClick={dismiss}
-          aria-label="Dispensar convite de instalação"
+          aria-label={t("pwa.dismiss")}
           className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[#b2907c] transition active:scale-90"
         >
           <X size={15} />
@@ -51,9 +53,9 @@ export function InstallBanner() {
 
       {showIosSteps && (
         <BottomSheet
-          label="Como instalar no iPhone"
-          eyebrow="Instalar"
-          title="Adicionar à tela de início"
+          label={t("pwa.iosLabel")}
+          eyebrow={t("pwa.install")}
+          title={t("pwa.iosTitle")}
           onClose={() => setShowIosSteps(false)}
           centerOnDesktop
         >
@@ -61,21 +63,17 @@ export function InstallBanner() {
             <IosStep
               number={1}
               icon={<Share size={17} />}
-              text="Toque no botão Compartilhar, na barra de baixo do Safari."
+              text={t("pwa.iosStep1")}
             />
             <IosStep
               number={2}
               icon={<SquarePlus size={17} />}
-              text="Role a lista e escolha “Adicionar à Tela de Início”."
+              text={t("pwa.iosStep2")}
             />
-            <IosStep
-              number={3}
-              text="Confirme em “Adicionar”. O ícone aparece junto dos outros apps."
-            />
+            <IosStep number={3} text={t("pwa.iosStep3")} />
           </ol>
           <p className="mt-4 rounded-xl bg-[#f3f0e9] px-3.5 py-3 text-[12px] leading-5 text-[#6b7686]">
-            No iPhone isso só funciona pelo Safari. Se você abriu por outro
-            navegador, copie o endereço e cole no Safari.
+            {t("pwa.iosNote")}
           </p>
         </BottomSheet>
       )}

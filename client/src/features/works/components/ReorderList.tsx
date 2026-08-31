@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import type { Work } from "@/features/works/types";
+import { useT } from "@/i18n/I18nContext";
 
 export function ReorderList({
   works,
@@ -30,6 +31,7 @@ export function ReorderList({
   onSave: (orderedIds: string[]) => Promise<boolean>;
   onCancel: () => void;
 }) {
+  const t = useT();
   const [ordered, setOrdered] = useState<Work[]>(works);
   const [saving, setSaving] = useState(false);
 
@@ -56,13 +58,13 @@ export function ReorderList({
     <div className="app-enter min-h-screen px-4 pb-16 pt-7 sm:px-5">
       <header className="mb-6">
         <p className="field-rule w-max pb-1.5 font-mono-field text-[9px] font-medium uppercase tracking-[0.16em] text-[#6a7180]">
-          Organizando · {label}
+          {t("reorder.eyebrow", { group: label })}
         </p>
         <h1 className="mt-1 text-[25px] font-bold tracking-[-0.04em] text-[#27374c]">
-          Ordem das fichas
+          {t("reorder.title")}
         </h1>
         <p className="mt-1.5 text-[13px] leading-5 text-[#6d7889]">
-          A primeira da lista é a que aparece no topo quando você abre o app.
+          {t("reorder.hint")}
         </p>
       </header>
 
@@ -72,7 +74,7 @@ export function ReorderList({
           disabled={saving}
           className="flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl border border-[#e2dbd0] bg-white text-[13px] font-bold text-[#4c5a6d] transition active:scale-[0.98] disabled:opacity-60"
         >
-          <X size={16} /> Cancelar
+          <X size={16} /> {t("common.cancel")}
         </button>
         <button
           onClick={save}
@@ -84,7 +86,7 @@ export function ReorderList({
           ) : (
             <Check size={16} />
           )}
-          {changed ? "Salvar ordem" : "Sem mudanças"}
+          {changed ? t("reorder.save") : t("reorder.noChanges")}
         </button>
       </div>
 
@@ -110,21 +112,21 @@ export function ReorderList({
 
             <div className="flex shrink-0 items-center gap-1">
               <MoveButton
-                label={`Mover ${work.street} para o topo`}
+                label={t("reorder.toTop", { street: work.street })}
                 disabled={index === 0}
                 onClick={() => moveTo(index, 0)}
               >
                 <ChevronsUp size={16} />
               </MoveButton>
               <MoveButton
-                label={`Mover ${work.street} para cima`}
+                label={t("reorder.up", { street: work.street })}
                 disabled={index === 0}
                 onClick={() => moveTo(index, index - 1)}
               >
                 <ArrowUp size={16} />
               </MoveButton>
               <MoveButton
-                label={`Mover ${work.street} para baixo`}
+                label={t("reorder.down", { street: work.street })}
                 disabled={index === ordered.length - 1}
                 onClick={() => moveTo(index, index + 1)}
               >

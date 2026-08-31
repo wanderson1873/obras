@@ -13,6 +13,7 @@ import { readCachedWorks, writeCachedWorks } from "./data/cache";
 import { supabaseWorksRepository } from "./data/supabase-repository";
 import type { WorksRepository } from "./data/repository";
 import { useAuth } from "@/features/auth/AuthContext";
+import { useT } from "@/i18n/I18nContext";
 import type { Photo, ShareScope, Work, WorkInput } from "./types";
 
 const repository: WorksRepository = supabaseWorksRepository;
@@ -39,6 +40,7 @@ function errorMessage(error: unknown, fallback: string) {
 
 export function useWorks(companyId: string | null) {
   const { session } = useAuth();
+  const t = useT();
   const myId = session?.user.id ?? "";
   const [works, setWorks] = useState<Work[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,10 +76,10 @@ export function useWorks(companyId: string | null) {
       if (cancelled) return;
 
       if (!ok) {
-        toast.error("Sem conexão com o servidor", {
+        toast.error(t("toast.offline"), {
           description: cached.length
-            ? "Mostrando as fichas salvas no aparelho. Não dá para editar agora."
-            : "Não foi possível carregar as obras.",
+            ? t("toast.offlineCached")
+            : t("toast.offlineEmpty"),
         });
       }
       setLoading(false);
@@ -111,8 +113,8 @@ export function useWorks(companyId: string | null) {
     } catch (error) {
       console.error("Falha ao salvar a obra.", error);
       setWorks(previous);
-      toast.error("Não foi possível salvar", {
-        description: errorMessage(error, "A alteração foi desfeita."),
+      toast.error(t("toast.saveFailed"), {
+        description: errorMessage(error, t("toast.saveUndone")),
       });
       return false;
     }
@@ -147,7 +149,9 @@ export function useWorks(companyId: string | null) {
         tasks: firstTask?.trim()
           ? [{ id: newId(), label: firstTask.trim(), done: false }]
           : [],
-        updates: [{ id: newId(), date: todayIso(), text: "Ficha criada." }],
+        updates: [
+          { id: newId(), date: todayIso(), text: t("work.createdEntry") },
+        ],
         history: [],
       };
       void persist(work);
@@ -187,8 +191,8 @@ export function useWorks(companyId: string | null) {
     } catch (error) {
       console.error("Falha ao gravar a ordem das obras.", error);
       setWorks(previous);
-      toast.error("Não foi possível salvar a ordem", {
-        description: errorMessage(error, "A lista voltou ao que estava."),
+      toast.error(t("reorder.failed"), {
+        description: errorMessage(error, t("reorder.failedHint")),
       });
       return false;
     }
@@ -210,17 +214,17 @@ export function useWorks(companyId: string | null) {
         void writeCachedWorks(worksRef.current);
         toast.success(
           scope === "private"
-            ? "Obra voltou a ser só sua"
+            ? t("share.savedPrivate")
             : scope === "company"
-              ? "Obra compartilhada com a equipe"
-              : "Obra compartilhada"
+              ? t("share.savedCompany")
+              : t("share.saved")
         );
         return true;
       } catch (error) {
         console.error("Falha ao mudar o compartilhamento.", error);
         setWorks(previous);
-        toast.error("Não foi possível mudar quem enxerga", {
-          description: errorMessage(error, "Nada foi alterado."),
+        toast.error(t("share.failed"), {
+          description: errorMessage(error, t("share.failedHint")),
         });
         return false;
       }
@@ -237,8 +241,8 @@ export function useWorks(companyId: string | null) {
     } catch (error) {
       console.error("Falha ao apagar a obra.", error);
       setWorks(previous);
-      toast.error("Não foi possível apagar a ficha.", {
-        description: errorMessage(error, "Tente de novo."),
+      toast.error(t("toast.deleteFailed"), {
+        description: errorMessage(error, t("toast.tryAgain")),
       });
     }
   }, []);
@@ -253,7 +257,7 @@ export function useWorks(companyId: string | null) {
           {
             id: newId(),
             date: todayIso(),
-            text: "Obra marcada como concluída.",
+            text: t("work.completedEntry"),
           },
           ...work.updates,
         ],
@@ -268,7 +272,7 @@ export function useWorks(companyId: string | null) {
         status: "active",
         completedAt: undefined,
         updates: [
-          { id: newId(), date: todayIso(), text: "Obra reaberta." },
+          { id: newId(), date: todayIso(), text: t("work.reopenedEntry") },
           ...work.updates,
         ],
       })),
@@ -350,11 +354,8 @@ export function useWorks(companyId: string | null) {
         await Promise.all(
           uploaded.map(photo => repository.deletePhoto(photo).catch(() => {}))
         );
-        toast.error("Não foi possível enviar a foto", {
-          description: errorMessage(
-            error,
-            "Verifique a conexão e tente de novo."
-          ),
+        toast.error(t("toast.photoFailed"), {
+          description: errorMessage(error, t("toast.photoFailedHint")),
         });
         return;
       }
@@ -371,8 +372,8 @@ export function useWorks(companyId: string | null) {
       }
       toast.success(
         uploaded.length === 1
-          ? "Foto adicionada"
-          : `${uploaded.length} fotos adicionadas`
+          ? t("toast.photoAdded")
+          : t("toast.photosAdded", { count: uploaded.length })
       );
     },
     [persist]

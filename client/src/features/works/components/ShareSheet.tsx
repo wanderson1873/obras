@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import type { CompanyMember } from "@/features/company/types";
 import type { ShareScope, Work } from "@/features/works/types";
+import { useT } from "@/i18n/I18nContext";
 import { BottomSheet } from "./BottomSheet";
 
 export function ShareSheet({
@@ -28,6 +29,7 @@ export function ShareSheet({
   onClose: () => void;
   onSave: (scope: ShareScope, userIds: string[]) => Promise<boolean>;
 }) {
+  const t = useT();
   const [scope, setScope] = useState<ShareScope>(work.shareScope);
   const [selected, setSelected] = useState<string[]>(work.sharedWith);
   const [saving, setSaving] = useState(false);
@@ -42,8 +44,8 @@ export function ShareSheet({
 
   async function save() {
     if (scope === "selected" && selected.length === 0) {
-      toast.error("Escolha pelo menos uma pessoa", {
-        description: "Ou deixe a obra como só sua.",
+      toast.error(t("share.pickSomeone"), {
+        description: t("share.pickSomeoneHint"),
       });
       return;
     }
@@ -55,8 +57,8 @@ export function ShareSheet({
 
   return (
     <BottomSheet
-      label="Quem enxerga esta obra"
-      eyebrow="Compartilhar"
+      label={t("share.label")}
+      eyebrow={t("share.title")}
       title={work.street}
       onClose={onClose}
       centerOnDesktop
@@ -64,24 +66,24 @@ export function ShareSheet({
       <div className="space-y-2">
         <ScopeOption
           icon={<Lock size={16} />}
-          title="Só eu"
-          description="Ninguém mais vê esta obra."
+          title={t("share.private")}
+          description={t("share.privateHint")}
           active={scope === "private"}
           onClick={() => setScope("private")}
         />
         <ScopeOption
           icon={<UserRound size={16} />}
-          title="Pessoas que eu escolher"
-          description="Só quem estiver marcado abaixo."
+          title={t("share.selected")}
+          description={t("share.selectedHint")}
           active={scope === "selected"}
           onClick={() => setScope("selected")}
           disabled={members.length === 0}
-          disabledReason="Ninguém mais na equipe ainda."
+          disabledReason={t("share.noOneElse")}
         />
         <ScopeOption
           icon={<Building2 size={16} />}
-          title={`Toda a ${companyName}`}
-          description="Todo mundo que entrar na equipe também verá."
+          title={t("share.company", { company: companyName })}
+          description={t("share.companyHint")}
           active={scope === "company"}
           onClick={() => setScope("company")}
         />
@@ -113,8 +115,7 @@ export function ShareSheet({
 
       <p className="mt-4 flex items-start gap-2 rounded-xl bg-[#f3f0e9] px-3.5 py-3 text-[12px] leading-5 text-[#6b7686]">
         <Users size={14} className="mt-0.5 shrink-0 text-[#8a929d]" />
-        Quem recebe pode editar a ficha e registrar o andamento, mas não pode
-        apagá-la nem mudar quem enxerga.
+        {t("share.note")}
       </p>
 
       <button
@@ -127,7 +128,7 @@ export function ShareSheet({
         ) : (
           <Check size={17} />
         )}{" "}
-        Salvar
+        {t("common.save")}
       </button>
     </BottomSheet>
   );

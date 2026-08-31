@@ -3,27 +3,28 @@
 import { useEffect, useState } from "react";
 import { House, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/i18n/I18nContext";
+import type { TranslationKey } from "@/i18n/translations";
 import { useAuth } from "./AuthContext";
 import { GoogleButton } from "./GoogleButton";
 
 type Mode = "signIn" | "signUp";
 
-/** As mensagens do Supabase vêm em inglês; traduzimos as que o usuário pode ver. */
-function readableError(message: string) {
-  const known: Record<string, string> = {
-    "Invalid login credentials": "E-mail ou senha incorretos.",
-    "Email not confirmed": "Confirme o e-mail antes de entrar.",
-    "User already registered": "Esse e-mail já tem conta. Use Entrar.",
-    "For security purposes, you can only request this after 60 seconds.":
-      "Aguarde um minuto antes de pedir de novo.",
-    "Password should be at least 6 characters.":
-      "A senha precisa ter pelo menos 6 caracteres.",
-  };
-  return known[message] ?? message;
-}
+/** O Supabase responde em inglês; mapeamos o que o usuário pode ver. */
+const ERROS: Record<string, TranslationKey> = {
+  "Invalid login credentials": "auth.err.invalidCredentials",
+  "Email not confirmed": "auth.err.emailNotConfirmed",
+  "User already registered": "auth.err.alreadyRegistered",
+  "For security purposes, you can only request this after 60 seconds.":
+    "auth.err.tooSoon",
+  "Password should be at least 6 characters.": "auth.passwordTooShort",
+};
 
 export function SignInScreen() {
   const { signIn, signUp, sendPasswordReset } = useAuth();
+  const t = useT();
+  const readableError = (message: string) =>
+    ERROS[message] ? t(ERROS[message]) : message;
   const [mode, setMode] = useState<Mode>("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,11 +51,11 @@ export function SignInScreen() {
     setError(null);
 
     if (!email.trim() || !password) {
-      setError("Preencha e-mail e senha.");
+      setError(t("auth.fillBoth"));
       return;
     }
     if (isSignUp && password.length < 6) {
-      setError("A senha precisa ter pelo menos 6 caracteres.");
+      setError(t("auth.passwordTooShort"));
       return;
     }
 
@@ -63,8 +64,8 @@ export function SignInScreen() {
       if (isSignUp) {
         const { needsConfirmation } = await signUp(email, password);
         if (needsConfirmation) {
-          toast.success("Conta criada", {
-            description: "Confirme o e-mail que enviamos e depois entre.",
+          toast.success(t("auth.accountCreated"), {
+            description: t("auth.confirmEmailSent"),
           });
           setMode("signIn");
         }
@@ -73,7 +74,7 @@ export function SignInScreen() {
       }
     } catch (caught) {
       const message =
-        caught instanceof Error ? caught.message : "Não foi possível entrar.";
+        caught instanceof Error ? caught.message : t("auth.genericFailure");
       setError(readableError(message));
     } finally {
       setBusy(false);
@@ -82,21 +83,19 @@ export function SignInScreen() {
 
   async function recoverPassword() {
     if (!email.trim()) {
-      setError("Escreva seu e-mail acima para receber o link de recuperação.");
+      setError(t("auth.typeEmailFirst"));
       return;
     }
     setError(null);
     setSendingReset(true);
     try {
       await sendPasswordReset(email);
-      toast.success("E-mail enviado", {
-        description: "Abra o link e depois troque a senha em Conta.",
+      toast.success(t("auth.resetSent"), {
+        description: t("auth.resetSentHint"),
       });
     } catch (caught) {
       const message =
-        caught instanceof Error
-          ? caught.message
-          : "Não foi possível enviar o e-mail.";
+        caught instanceof Error ? caught.message : t("auth.genericFailure");
       setError(readableError(message));
     } finally {
       setSendingReset(false);
@@ -119,9 +118,7 @@ export function SignInScreen() {
         </div>
 
         <p className="mb-6 text-[14px] leading-6 text-[#647084]">
-          {isSignUp
-            ? "Crie sua conta para guardar as fichas e abrir de qualquer aparelho."
-            : "Entre uma vez — o aparelho guarda a sessão e o app abre direto nas obras."}
+          {isSignUp ? t("auth.tagline.signUp") : t("auth.tagline.signIn")}
         </p>
 
         <GoogleButton onError={setError} />
@@ -129,7 +126,7 @@ export function SignInScreen() {
         <div className="my-5 flex items-center gap-3">
           <span className="h-px flex-1 bg-[#e6e0d6]" />
           <span className="font-mono-field text-[9px] uppercase tracking-[0.16em] text-[#9aa2ac]">
-            ou com e-mail
+            {t("auth.orEmail")}
           </span>
           <span className="h-px flex-1 bg-[#e6e0d6]" />
         </div>
@@ -137,7 +134,7 @@ export function SignInScreen() {
         <form onSubmit={submit} className="space-y-4">
           <label className="block">
             <span className="mb-1.5 block text-[12px] font-bold text-[#526073]">
-              E-mail
+              {t("auth.email")}
             </span>
             <input
               type="email"
@@ -145,21 +142,25 @@ export function SignInScreen() {
               inputMode="email"
               value={email}
               onChange={event => setEmail(event.target.value)}
-              placeholder="voce@exemplo.com"
+              placeholder={t("auth.emailPlaceholder")}
               className="h-12 w-full rounded-xl border border-[#e4ded3] bg-white px-3 text-sm outline-none transition focus:border-[#e86a33]"
             />
           </label>
 
           <label className="block">
             <span className="mb-1.5 block text-[12px] font-bold text-[#526073]">
-              Senha
+              {t("auth.password")}
             </span>
             <input
               type="password"
               autoComplete={isSignUp ? "new-password" : "current-password"}
               value={password}
               onChange={event => setPassword(event.target.value)}
-              placeholder={isSignUp ? "Mínimo de 6 caracteres" : "Sua senha"}
+              placeholder={
+                isSignUp
+                  ? t("auth.passwordMinPlaceholder")
+                  : t("auth.passwordPlaceholder")
+              }
               className="h-12 w-full rounded-xl border border-[#e4ded3] bg-white px-3 text-sm outline-none transition focus:border-[#e86a33]"
             />
           </label>
@@ -179,7 +180,7 @@ export function SignInScreen() {
             className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#27374c] text-sm font-bold text-white shadow-[0_8px_18px_rgba(39,55,76,0.2)] transition active:scale-[0.98] disabled:opacity-70"
           >
             {busy && <Loader2 size={17} className="animate-spin" />}
-            {isSignUp ? "Criar conta" : "Entrar"}
+            {isSignUp ? t("auth.createAccount") : t("auth.signIn")}
           </button>
         </form>
 
@@ -189,7 +190,7 @@ export function SignInScreen() {
             disabled={sendingReset}
             className="mt-4 w-full text-center text-[13px] font-semibold text-[#6d7889] disabled:opacity-60"
           >
-            {sendingReset ? "Enviando…" : "Esqueci minha senha"}
+            {sendingReset ? t("common.sending") : t("auth.forgot")}
           </button>
         )}
 
@@ -200,7 +201,7 @@ export function SignInScreen() {
           }}
           className="mt-3 w-full text-center text-[13px] font-semibold text-[#a7502b]"
         >
-          {isSignUp ? "Já tenho conta. Entrar" : "Ainda não tenho conta. Criar"}
+          {isSignUp ? t("auth.toSignIn") : t("auth.toSignUp")}
         </button>
       </div>
     </div>

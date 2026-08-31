@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Redirect, Route, Switch } from "wouter";
 import { House, TriangleAlert } from "lucide-react";
 import { supabaseConfigured } from "@/lib/supabase";
+import { I18nProvider, useT } from "./i18n/I18nContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
@@ -42,6 +43,7 @@ function Splash() {
  * é melhor do que uma tela de login que falha em todo clique.
  */
 function MissingConfigScreen() {
+  const t = useT();
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f7f5f0] px-4 text-[#27374c]">
       <div className="w-full max-w-[420px] rounded-[28px] border border-[#e8e2d7] bg-[#fbfaf7] p-6 shadow-[0_18px_50px_rgba(39,55,76,0.1)]">
@@ -52,11 +54,10 @@ function MissingConfigScreen() {
           <TriangleAlert size={21} />
         </span>
         <h1 className="text-[21px] font-bold tracking-[-0.035em]">
-          Configuração ausente
+          {t("config.title")}
         </h1>
         <p className="mt-2 text-[14px] leading-6 text-[#647084]">
-          O app subiu, mas não sabe a qual banco se conectar. Defina estas duas
-          variáveis em Ambiente, no painel, e reinicie o serviço:
+          {t("config.body")}
         </p>
         <ul className="mt-3 space-y-1.5 rounded-xl bg-[#f3f0e9] px-3.5 py-3 font-mono-field text-[12px] text-[#4f5c6e]">
           <li>VITE_SUPABASE_URL</li>
@@ -79,16 +80,18 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          <Toaster />
-          {supabaseConfigured ? (
-            <AuthProvider>
-              <AuthenticatedApp />
-            </AuthProvider>
-          ) : (
-            <MissingConfigScreen />
-          )}
-        </TooltipProvider>
+        <I18nProvider>
+          <TooltipProvider>
+            <Toaster />
+            {supabaseConfigured ? (
+              <AuthProvider>
+                <AuthenticatedApp />
+              </AuthProvider>
+            ) : (
+              <MissingConfigScreen />
+            )}
+          </TooltipProvider>
+        </I18nProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

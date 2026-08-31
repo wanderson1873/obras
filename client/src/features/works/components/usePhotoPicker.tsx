@@ -6,10 +6,12 @@
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { compressImageFile } from "@/lib/photos";
+import { useT } from "@/i18n/I18nContext";
 
 export function usePhotoPicker(
   onPicked: (files: Blob[]) => Promise<void> | void
 ) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -28,14 +30,14 @@ export function usePhotoPicker(
         await onPicked(compressed);
       } catch (error) {
         console.error("Falha ao processar a foto.", error);
-        toast.error("Não foi possível preparar a foto", {
-          description: "Tente outra imagem.",
+        toast.error(t("toast.photoPrepFailed"), {
+          description: t("toast.photoPrepHint"),
         });
       } finally {
         setBusy(false);
       }
     },
-    [onPicked]
+    [onPicked, t]
   );
 
   const input = (

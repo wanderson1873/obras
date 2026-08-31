@@ -8,8 +8,10 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useRegisterSW } from "virtual:pwa-register/react";
+import { useT } from "@/i18n/I18nContext";
 
 export function useAppUpdate() {
+  const t = useT();
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -22,14 +24,14 @@ export function useAppUpdate() {
   useEffect(() => {
     if (!needRefresh) return;
 
-    toast("Nova versão do Obras disponível", {
-      description: "Atualize quando estiver num bom momento.",
+    toast(t("pwa.newVersion"), {
+      description: t("pwa.newVersionHint"),
       duration: Infinity,
       action: {
-        label: "Atualizar",
+        label: t("pwa.update"),
         onClick: () => void updateServiceWorker(true),
       },
       onDismiss: () => setNeedRefresh(false),
     });
-  }, [needRefresh, setNeedRefresh, updateServiceWorker]);
+  }, [needRefresh, setNeedRefresh, updateServiceWorker, t]);
 }

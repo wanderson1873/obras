@@ -13,7 +13,8 @@ import {
   UserRound,
   Zap,
 } from "lucide-react";
-import { formatDuration, formatShortDate } from "@/lib/dates";
+import { useT } from "@/i18n/I18nContext";
+import { useDates } from "@/i18n/useDates";
 import type { Work } from "@/features/works/types";
 
 export function WorkCard({
@@ -30,6 +31,8 @@ export function WorkCard({
   onOpen: () => void;
   onNavigate: () => void;
 }) {
+  const t = useT();
+  const d = useDates();
   const cover = work.photos[0]?.url;
 
   return (
@@ -43,7 +46,7 @@ export function WorkCard({
       }}
       role="button"
       tabIndex={0}
-      aria-label={`Abrir ficha de ${work.street}`}
+      aria-label={t("card.openLabel", { street: work.street })}
       className="card-grain group relative overflow-hidden rounded-[25px] border border-[#e9e3d8] bg-[#fffefa] text-left shadow-[0_7px_22px_rgba(39,55,76,0.07)] outline-none transition duration-200 focus-visible:ring-4 focus-visible:ring-[#f8d1bd] active:scale-[0.99]"
       style={{ animationDelay: `${index * 45}ms` }}
     >
@@ -55,7 +58,7 @@ export function WorkCard({
         {cover ? (
           <img
             src={cover}
-            alt={`Fachada de ${work.street}`}
+            alt={t("detail.facadeAlt", { street: work.street })}
             loading="lazy"
             className="document-photo h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]"
           />
@@ -63,18 +66,21 @@ export function WorkCard({
           <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-[#a49c90]">
             <House size={26} strokeWidth={1.8} />
             <span className="font-mono-field text-[9px] uppercase tracking-[0.14em]">
-              Sem foto da fachada
+              {t("card.noPhoto")}
             </span>
           </div>
         )}
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#142030]/45 to-transparent" />
         {work.status === "active" ? (
           <div className="absolute left-4 top-4 rounded-md bg-[#27374c]/85 px-2 py-1 font-mono-field text-[9px] font-medium tracking-[0.12em] text-white">
-            FICHA {String(index + 1).padStart(2, "0")}
+            {t("card.sheetNumber", {
+              number: String(index + 1).padStart(2, "0"),
+            })}
           </div>
         ) : (
           <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[#f5f2eb]/95 px-2.5 py-1.5 font-mono-field text-[10px] font-medium uppercase tracking-[0.09em] text-[#526071]">
-            <CheckCircle2 size={13} className="text-[#52936c]" /> Concluída
+            <CheckCircle2 size={13} className="text-[#52936c]" />{" "}
+            {t("card.done")}
           </div>
         )}
       </div>
@@ -83,8 +89,8 @@ export function WorkCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 font-mono-field text-[8px] font-medium uppercase tracking-[0.14em] text-[#8a929d]">
-              <KeyRound size={11} className="text-[#e86a33]" /> Código de
-              entrada
+              <KeyRound size={11} className="text-[#e86a33]" />{" "}
+              {t("card.entryCode")}
             </p>
             {work.code ? (
               <h3 className="mt-0.5 font-mono-field text-[27px] font-medium leading-tight tracking-[0.15em] text-[#27374c]">
@@ -94,21 +100,21 @@ export function WorkCard({
               // O lugar continua reservado para o olho não ter que reaprender
               // onde procurar a cada ficha.
               <p className="mt-1 text-[15px] font-semibold italic text-[#a7aeb8]">
-                sem código
+                {t("card.noCode")}
               </p>
             )}
             <p className="mt-1.5 flex items-center gap-1 text-[13px] font-semibold text-[#637084]">
               <MapPin size={13} /> {work.city}
             </p>
             <p className="mt-1 flex items-center gap-1 font-mono-field text-[9px] font-medium uppercase tracking-[0.06em] text-[#8a929d]">
-              <CalendarDays size={12} /> {formatShortDate(work.startDate)}
+              <CalendarDays size={12} /> {d.short(work.startDate)}
               <span className="text-[#b0a59a]">·</span>{" "}
-              {formatDuration(work.startDate)}
+              {d.duration(work.startDate)}
             </p>
           </div>
           {work.status === "completed" && work.completedAt && (
             <span className="whitespace-nowrap font-mono-field text-[10px] text-[#7e8794]">
-              {formatShortDate(work.completedAt)}
+              {d.short(work.completedAt)}
             </span>
           )}
         </div>
@@ -119,7 +125,7 @@ export function WorkCard({
             <MapPin size={15} className="shrink-0 text-[#e86a33]" />
             <div className="min-w-0">
               <span className="block font-mono-field text-[8px] font-medium uppercase tracking-[0.12em] text-[#788293]">
-                Endereço
+                {t("card.address")}
               </span>
               {/* Duas linhas: endereço com número de apartamento não pode
                   ser cortado justo na parte que diz onde entrar. */}
@@ -141,29 +147,36 @@ export function WorkCard({
           <ConditionChip
             icon={<Droplets size={12} />}
             available={work.waterAvailable}
-            label="água"
+            label={
+              work.waterAvailable ? t("card.withWater") : t("card.noWater")
+            }
           />
           <ConditionChip
             icon={<Zap size={12} />}
             available={work.powerAvailable}
-            label="energia"
+            label={
+              work.powerAvailable ? t("card.withPower") : t("card.noPower")
+            }
           />
           {!isMine && (
             <ShareChip
               icon={<UserRound size={12} />}
-              label="Compartilhada comigo"
+              label={t("card.sharedWithMe")}
             />
           )}
           {isMine && work.shareScope === "company" && (
-            <ShareChip icon={<Building2 size={12} />} label="Toda a equipe" />
+            <ShareChip
+              icon={<Building2 size={12} />}
+              label={t("card.wholeTeam")}
+            />
           )}
           {isMine && work.shareScope === "selected" && (
             <ShareChip
               icon={<Share2 size={12} />}
               label={
                 work.sharedWith.length === 1
-                  ? "Compartilhada"
-                  : `Compartilhada · ${work.sharedWith.length}`
+                  ? t("card.shared")
+                  : t("card.sharedCount", { count: work.sharedWith.length })
               }
             />
           )}
@@ -180,16 +193,17 @@ function RouteButton({
   work: Work;
   onNavigate: () => void;
 }) {
+  const t = useT();
   return (
     <button
       onClick={event => {
         event.stopPropagation();
         onNavigate();
       }}
-      aria-label={`Abrir rota para ${work.street}`}
+      aria-label={t("card.routeLabel", { street: work.street })}
       className="flex shrink-0 items-center gap-1 rounded-xl bg-white px-2.5 py-1.5 text-[12px] font-bold text-[#33465e] shadow-sm transition active:scale-[0.96]"
     >
-      <Navigation size={14} className="text-[#e86a33]" /> Rota
+      <Navigation size={14} className="text-[#e86a33]" /> {t("card.route")}
     </button>
   );
 }
@@ -219,7 +233,7 @@ function ConditionChip({
           : "bg-[#fff0e8] text-[#a74b29]"
       }`}
     >
-      {icon} {available ? `Com ${label}` : `Sem ${label}`}
+      {icon} {label}
     </span>
   );
 }

@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/i18n/I18nContext";
 import { useAuth } from "./AuthContext";
 
 export function GoogleButton({
@@ -15,6 +16,7 @@ export function GoogleButton({
   onError: (message: string) => void;
 }) {
   const { signInWithGoogle } = useAuth();
+  const t = useT();
   const [busy, setBusy] = useState(false);
 
   async function enter() {
@@ -26,9 +28,7 @@ export function GoogleButton({
     } catch (caught) {
       setBusy(false);
       onError(
-        caught instanceof Error
-          ? caught.message
-          : "Não foi possível abrir a entrada do Google."
+        caught instanceof Error ? caught.message : t("auth.googleFailed")
       );
     }
   }
@@ -41,7 +41,7 @@ export function GoogleButton({
       className="flex h-12 w-full items-center justify-center gap-2.5 rounded-2xl border border-[#e0dad0] bg-white text-sm font-bold text-[#3c4658] transition active:scale-[0.98] disabled:opacity-70"
     >
       {busy ? <Loader2 size={17} className="animate-spin" /> : <GoogleMark />}
-      Entrar com o Google
+      {t("auth.google")}
     </button>
   );
 }
