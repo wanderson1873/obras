@@ -74,7 +74,18 @@ export default function Home() {
     if (formState?.kind === "edit" && editingWork) {
       works.editWork(editingWork.id, input);
       setFormState(null);
-      toast.success(t("toast.workUpdated"));
+      const mudouDeLugar =
+        companyId !== undefined && companyId !== editingWork.companyId;
+      if (mudouDeLugar) {
+        // O aviso de mudança de organização já diz tudo; dois seria demais.
+        void works.setCompany(
+          editingWork.id,
+          companyId ?? null,
+          nomeDaOrganizacao(companyId ?? null)
+        );
+      } else {
+        toast.success(t("toast.workUpdated"));
+      }
       return;
     }
     const destino = companyId ?? null;
@@ -196,6 +207,9 @@ export default function Home() {
           key={formState.kind === "edit" ? formState.workId : "new"}
           work={editingWork ?? undefined}
           companies={companies}
+          canChangeOrganization={
+            !editingWork || editingWork.ownerId === works.myId
+          }
           onClose={() => setFormState(null)}
           onSave={handleSave}
         />

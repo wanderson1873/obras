@@ -64,11 +64,14 @@ function formFromWork(work?: Work): WorkInput {
 export function WorkFormSheet({
   work,
   companies,
+  canChangeOrganization = true,
   onClose,
   onSave,
 }: {
   work?: Work;
   companies: Company[];
+  /** Mover a ficha muda quem a enxerga: só quem criou decide isso. */
+  canChangeOrganization?: boolean;
   onClose: () => void;
   onSave: (
     form: WorkInput,
@@ -79,11 +82,13 @@ export function WorkFormSheet({
   const t = useT();
   const [form, setForm] = useState<WorkInput>(() => formFromWork(work));
   /**
-   * Onde a ficha vai nascer. Privada por padrão: é a escolha que não
-   * surpreende ninguém, já que abrir para a organização muda quem enxerga.
-   * Quem já tem ficha muda isso pelo botão de organização, não por aqui.
+   * Onde a ficha fica. Nova nasce privada — a escolha que não surpreende
+   * ninguém, já que abrir para a organização muda quem enxerga o código da
+   * porta. Editando, começa de onde a ficha está hoje.
    */
-  const [destino, setDestino] = useState<string | null>(null);
+  const [destino, setDestino] = useState<string | null>(
+    work?.companyId ?? null
+  );
   const [includeChecklist, setIncludeChecklist] = useState(false);
   const [firstTask, setFirstTask] = useState("");
   const [errors, setErrors] = useState<Partial<Record<RequiredField, string>>>(
@@ -273,7 +278,7 @@ export function WorkFormSheet({
           </>
         )}
 
-        {!work && (
+        {canChangeOrganization && (
           <section className="rounded-2xl bg-[#f3f0e9] p-3">
             <p className="mb-3 font-mono-field text-[10px] font-medium uppercase tracking-[0.13em] text-[#657185]">
               {t("form.destination")}
