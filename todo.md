@@ -1,3 +1,21 @@
+# Atualização: modelo de organizações (1 set 2026)
+
+Modelo corrigido conforme o recap: a ficha é privada quando não tem
+organização e é da organização quando tem. Todo mundo da organização vê,
+edita e conclui. Apagar continua só com quem criou.
+
+- [x] Sai o compartilhamento com pessoas soltas: some work_viewers e share_scope.
+      A presença de company_id já diz tudo, e estado redundante um dia diverge.
+- [x] Uma pessoa pode criar e participar de várias organizações.
+- [x] Ficha nova nasce privada; mover é uma escolha à parte, só de quem criou.
+- [x] Tela de Equipe lista todas as organizações, com convites e "sair" em cada.
+- [x] Filtro na lista com marcadores: Privada + uma por organização.
+      Nenhum marcado = mostra tudo.
+- [x] Selo no card com o nome da organização.
+- [x] Testado no banco com 3 pessoas e 2 organizações: cada um vê o que deve,
+      membro edita e conclui ficha da organização mas não apaga nem tira dela.
+- [x] Testado na tela: mover ficha para a MAIA e o filtro acompanhando.
+
 # Em andamento: tradução do conteúdo escrito (1 set 2026)
 
 ## Servidor (pronto e testado)

@@ -6,7 +6,7 @@
  * código quando o celular estiver sem sinal na obra.
  */
 
-import type { Photo, ShareScope, Work } from "@/features/works/types";
+import type { Photo, Work } from "@/features/works/types";
 
 export interface WorksRepository {
   /** `language` decide em que idioma o conteúdo volta. */
@@ -16,12 +16,8 @@ export interface WorksRepository {
   remove(id: string): Promise<void>;
   /** Grava a ordem manual da lista inteira em uma chamada só. */
   reorder(orderedIds: string[]): Promise<void>;
-  /** Define quem enxerga a obra. Só quem criou pode chamar. */
-  setSharing(
-    workId: string,
-    scope: ShareScope,
-    userIds: string[]
-  ): Promise<void>;
+  /** Move a ficha para uma organização, ou para privada com null. Só quem criou. */
+  setCompany(workId: string, companyId: string | null): Promise<void>;
   /** Manda traduzir o conteúdo escrito da obra para os outros idiomas. */
   requestTranslation(workId: string): Promise<void>;
   /** Envia a foto já comprimida para o Storage e devolve o registro pronto. */

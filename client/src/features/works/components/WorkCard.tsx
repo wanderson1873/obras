@@ -9,7 +9,6 @@ import {
   KeyRound,
   MapPin,
   Navigation,
-  Share2,
   UserRound,
   Zap,
 } from "lucide-react";
@@ -21,13 +20,16 @@ export function WorkCard({
   work,
   index,
   isMine,
+  companyName,
   onOpen,
   onNavigate,
 }: {
   work: Work;
   index: number;
-  /** false quando a obra chegou compartilhada por outra pessoa. */
+  /** false quando a ficha é de uma organização e foi criada por outra pessoa. */
   isMine: boolean;
+  /** Nome da organização da ficha, quando não é privada. */
+  companyName?: string;
   onOpen: () => void;
   onNavigate: () => void;
 }) {
@@ -164,21 +166,8 @@ export function WorkCard({
               label={t("card.sharedWithMe")}
             />
           )}
-          {isMine && work.shareScope === "company" && (
-            <ShareChip
-              icon={<Building2 size={12} />}
-              label={t("card.wholeTeam")}
-            />
-          )}
-          {isMine && work.shareScope === "selected" && (
-            <ShareChip
-              icon={<Share2 size={12} />}
-              label={
-                work.sharedWith.length === 1
-                  ? t("card.shared")
-                  : t("card.sharedCount", { count: work.sharedWith.length })
-              }
-            />
+          {companyName && (
+            <ShareChip icon={<Building2 size={12} />} label={companyName} />
           )}
         </div>
       </div>

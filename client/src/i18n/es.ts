@@ -326,6 +326,28 @@ export const es: Translations = {
   "config.body":
     "La app arrancó pero no sabe a qué base conectarse. Define estas dos variables en Ambiente, en el panel, y reinicia el servicio:",
 
+  "org.section": "Organización",
+  "org.private": "Privada",
+  "org.privateHint": "Solo tú ves esta obra.",
+  "org.belongsTo": "De {org}",
+  "org.belongsToHint":
+    "Todos los de la organización la ven, editan y terminan.",
+  "org.pickTitle": "Dónde queda esta obra",
+  "org.pickHint":
+    "Una obra en una organización la ven y editan todos los que están en ella. Borrar sigue siendo solo tuyo.",
+  "org.movedPrivate": "La obra volvió a ser privada",
+  "org.moved": "La obra ahora es de {org}",
+  "org.failed": "No se pudo cambiar la organización",
+  "org.noneYet": "Todavía no estás en ninguna organización.",
+  "org.createAnother": "Crear otra organización",
+  "org.leave": "Salir de esta organización",
+  "org.leaveConfirm": "¿Salir de {org}?",
+  "org.leaveBody":
+    "Dejas de ver sus obras. Las que tú creaste siguen siendo tuyas.",
+  "filter.title": "Mostrar",
+  "filter.label": "Filtrar por organización",
+  "filter.all": "Todo",
+
   "translated.from": "Traducido del {lang}",
   "translated.showOriginal": "Ver original",
   "translated.showTranslation": "Ver traducción",

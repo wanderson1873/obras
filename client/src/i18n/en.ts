@@ -324,6 +324,27 @@ export const en: Translations = {
   "config.body":
     "The app started but does not know which database to connect to. Set these two variables under Environment in the panel and restart the service:",
 
+  "org.section": "Organization",
+  "org.private": "Private",
+  "org.privateHint": "Only you can see this job.",
+  "org.belongsTo": "In {org}",
+  "org.belongsToHint":
+    "Everyone in the organization can see, edit and finish it.",
+  "org.pickTitle": "Where this job lives",
+  "org.pickHint":
+    "A job in an organization is seen and edited by everyone in it. Deleting is still only yours.",
+  "org.movedPrivate": "Job is private again",
+  "org.moved": "Job now belongs to {org}",
+  "org.failed": "Could not change the organization",
+  "org.noneYet": "You are not in any organization yet.",
+  "org.createAnother": "Create another organization",
+  "org.leave": "Leave this organization",
+  "org.leaveConfirm": "Leave {org}?",
+  "org.leaveBody": "You stop seeing its jobs. The ones you created stay yours.",
+  "filter.title": "Show",
+  "filter.label": "Filter by organization",
+  "filter.all": "Everything",
+
   "translated.from": "Translated from {lang}",
   "translated.showOriginal": "Show original",
   "translated.showTranslation": "Show translation",

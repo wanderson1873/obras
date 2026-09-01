@@ -22,10 +22,8 @@ import {
   Plus,
   RotateCcw,
   Languages,
-  Share2,
   Star,
   Trash2,
-  UserRound,
   X,
   Zap,
 } from "lucide-react";
@@ -43,9 +41,9 @@ import { usePhotoPicker } from "./usePhotoPicker";
 type DetailActions = {
   /** false quando a obra chegou compartilhada por outra pessoa. */
   isMine: boolean;
-  /** Quantas pessoas enxergam além de quem criou. */
-  sharedCount: number;
-  onShare: () => void;
+  /** Nome da organização da ficha, quando não é privada. */
+  companyName?: string;
+  onChangeOrganization: () => void;
   onBack: () => void;
   onNavigate: () => void;
   onEdit: () => void;
@@ -72,12 +70,7 @@ export function WorkDetail({
   const [newUpdate, setNewUpdate] = useState("");
   const [verOriginal, setVerOriginal] = useState(false);
   const doneCount = work.tasks.filter(task => task.done).length;
-  const compartilhamento = describeSharing(
-    work,
-    actions.isMine,
-    actions.sharedCount,
-    t
-  );
+  const ondeFica = describeOrganization(actions.isMine, actions.companyName, t);
   const picker = usePhotoPicker(actions.onAddPhotos);
 
   return (
@@ -150,24 +143,22 @@ export function WorkDetail({
 
         <section className="mb-7">
           <SectionHeading
-            icon={<Share2 size={16} />}
-            label={t("detail.whoSees")}
+            icon={<Building2 size={16} />}
+            label={t("org.section")}
           />
           <div className="mt-3 flex items-center gap-3 rounded-2xl border border-[#eae4da] bg-white px-4 py-3">
-            <span className="shrink-0 text-[#e86a33]">
-              {compartilhamento.icon}
-            </span>
+            <span className="shrink-0 text-[#e86a33]">{ondeFica.icon}</span>
             <span className="min-w-0 flex-1">
               <span className="block text-[14px] font-semibold text-[#47556a]">
-                {compartilhamento.title}
+                {ondeFica.title}
               </span>
               <span className="block text-[12px] leading-4 text-[#8a929d]">
-                {compartilhamento.description}
+                {ondeFica.description}
               </span>
             </span>
             {actions.isMine && (
               <button
-                onClick={actions.onShare}
+                onClick={actions.onChangeOrganization}
                 className="shrink-0 rounded-xl bg-[#f3f0e9] px-3 py-2 text-[12px] font-bold text-[#4f5c6e] transition active:scale-95"
               >
                 {t("common.change")}
@@ -466,41 +457,25 @@ export function WorkDetail({
   );
 }
 
-/** Frase que descreve o compartilhamento atual da obra. */
-function describeSharing(
-  work: Work,
+/** Frase que diz onde a ficha fica: privada ou de uma organização. */
+function describeOrganization(
   isMine: boolean,
-  sharedCount: number,
+  companyName: string | undefined,
   t: (key: TranslationKey, values?: Record<string, string | number>) => string
 ) {
-  if (!isMine) {
-    return {
-      icon: <UserRound size={17} />,
-      title: t("detail.sharedWithYou"),
-      description: t("detail.sharedWithYouHint"),
-    };
-  }
-  if (work.shareScope === "company") {
+  if (companyName) {
     return {
       icon: <Building2 size={17} />,
-      title: t("detail.shareTeam"),
-      description: t("detail.shareTeamHint"),
-    };
-  }
-  if (work.shareScope === "selected") {
-    return {
-      icon: <Share2 size={17} />,
-      title:
-        sharedCount === 1
-          ? t("detail.shareOne")
-          : t("detail.shareMany", { count: sharedCount }),
-      description: t("detail.shareSelectedHint"),
+      title: t("org.belongsTo", { org: companyName }),
+      description: isMine
+        ? t("org.belongsToHint")
+        : t("detail.sharedWithYouHint"),
     };
   }
   return {
     icon: <Lock size={17} />,
-    title: t("detail.sharePrivate"),
-    description: t("detail.sharePrivateHint"),
+    title: t("org.private"),
+    description: t("org.privateHint"),
   };
 }
 

@@ -14,7 +14,7 @@ import { supabaseWorksRepository } from "./data/supabase-repository";
 import type { WorksRepository } from "./data/repository";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useI18n } from "@/i18n/I18nContext";
-import type { Photo, ShareScope, Work, WorkInput } from "./types";
+import type { Photo, Work, WorkInput } from "./types";
 
 const repository: WorksRepository = supabaseWorksRepository;
 
@@ -38,7 +38,7 @@ function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
-export function useWorks(companyId: string | null) {
+export function useWorks() {
   const { session } = useAuth();
   const { t, language } = useI18n();
   const myId = session?.user.id ?? "";
@@ -144,9 +144,8 @@ export function useWorks(companyId: string | null) {
         ...input,
         id: newId(),
         ownerId: myId,
-        companyId,
-        shareScope: "private",
-        sharedWith: [],
+        // Ficha nasce privada; mover para uma organização é uma escolha à parte.
+        companyId: null,
         sourceLang: null,
         translation: null,
         status: "active",
@@ -168,7 +167,7 @@ export function useWorks(companyId: string | null) {
       void persist(work);
       return work;
     },
-    [persist, myId, companyId]
+    [persist, myId]
   );
 
   const editWork = useCallback(
@@ -209,38 +208,34 @@ export function useWorks(companyId: string | null) {
     }
   }, []);
 
-  /** Trocar quem enxerga passa por uma função própria no banco, não pelo save. */
-  const setSharing = useCallback(
-    async (workId: string, scope: ShareScope, userIds: string[]) => {
+  /** Mover a ficha entre privada e organização. Só quem criou consegue. */
+  const setCompany = useCallback(
+    async (workId: string, companyId: string | null, companyName?: string) => {
       const previous = worksRef.current;
       setWorks(current =>
         current.map(work =>
-          work.id === workId
-            ? { ...work, shareScope: scope, sharedWith: userIds }
-            : work
+          work.id === workId ? { ...work, companyId } : work
         )
       );
       try {
-        await repository.setSharing(workId, scope, userIds);
+        await repository.setCompany(workId, companyId);
         void writeCachedWorks(worksRef.current);
         toast.success(
-          scope === "private"
-            ? t("share.savedPrivate")
-            : scope === "company"
-              ? t("share.savedCompany")
-              : t("share.saved")
+          companyId && companyName
+            ? t("org.moved", { org: companyName })
+            : t("org.movedPrivate")
         );
         return true;
       } catch (error) {
-        console.error("Falha ao mudar o compartilhamento.", error);
+        console.error("Falha ao mudar a organização da obra.", error);
         setWorks(previous);
-        toast.error(t("share.failed"), {
-          description: errorMessage(error, t("share.failedHint")),
+        toast.error(t("org.failed"), {
+          description: errorMessage(error, t("toast.saveUndone")),
         });
         return false;
       }
     },
-    []
+    [t]
   );
 
   const removeWork = useCallback(async (workId: string) => {
@@ -443,7 +438,7 @@ export function useWorks(companyId: string | null) {
     editWork,
     removeWork,
     reorderWorks,
-    setSharing,
+    setCompany,
     myId,
     completeWork,
     reopenWork,

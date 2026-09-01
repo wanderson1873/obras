@@ -339,6 +339,29 @@ export const pt = {
     "O app subiu, mas não sabe a qual banco se conectar. Defina estas duas variáveis em Ambiente, no painel, e reinicie o serviço:",
 
   // Tradução do conteúdo
+  // Organização da ficha
+  "org.section": "Organização",
+  "org.private": "Privada",
+  "org.privateHint": "Só você vê esta ficha.",
+  "org.belongsTo": "De {org}",
+  "org.belongsToHint": "Todo mundo da organização vê, edita e conclui.",
+  "org.pickTitle": "Onde fica esta ficha",
+  "org.pickHint":
+    "Ficha em organização é vista e editada por todo mundo dela. Apagar continua só com você.",
+  "org.movedPrivate": "Ficha voltou a ser privada",
+  "org.moved": "Ficha agora é da {org}",
+  "org.failed": "Não foi possível mudar a organização",
+  "org.noneYet": "Você ainda não participa de nenhuma organização.",
+  "org.createAnother": "Criar outra organização",
+  "org.leave": "Sair desta organização",
+  "org.leaveConfirm": "Sair da {org}?",
+  "org.leaveBody":
+    "Você deixa de ver as fichas dela. As que você criou continuam suas.",
+  // Filtro da lista
+  "filter.title": "Mostrar",
+  "filter.label": "Filtrar por organização",
+  "filter.all": "Tudo",
+
   "translated.from": "Traduzido do {lang}",
   "translated.showOriginal": "Ver original",
   "translated.showTranslation": "Ver tradução",

@@ -10,8 +10,8 @@ import { WorkFormSheet } from "@/features/works/components/WorkFormSheet";
 import { WorkList } from "@/features/works/components/WorkList";
 import { useWorks } from "@/features/works/useWorks";
 import { AccountSheet } from "@/features/auth/AccountSheet";
-import { ShareSheet } from "@/features/works/components/ShareSheet";
-import { useCompany } from "@/features/company/useCompany";
+import { OrganizationSheet } from "@/features/works/components/OrganizationSheet";
+import { useCompanies } from "@/features/company/useCompanies";
 import { useT } from "@/i18n/I18nContext";
 import { CompanySheet } from "@/features/company/CompanySheet";
 import type { Work, WorkStatus } from "@/features/works/types";
@@ -21,8 +21,8 @@ type Confirmation = { kind: "complete" | "delete"; workId: string };
 
 export default function Home() {
   const t = useT();
-  const { company } = useCompany();
-  const works = useWorks(company?.id ?? null);
+  const { companies } = useCompanies();
+  const works = useWorks();
   const [tab, setTab] = useState<WorkStatus>("active");
   const [query, setQuery] = useState("");
   const [openWorkId, setOpenWorkId] = useState<string | null>(null);
@@ -32,6 +32,11 @@ export default function Home() {
   const [organizing, setOrganizing] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
   const [sharingWorkId, setSharingWorkId] = useState<string | null>(null);
+  /**
+   * Baldes marcados no filtro: ids de organização mais "private".
+   * Lista vazia significa "mostrar tudo" — é o estado inicial.
+   */
+  const [buckets, setBuckets] = useState<string[]>([]);
   const [showTeam, setShowTeam] = useState(false);
 
   const byId = (id: string | null) =>
@@ -41,12 +46,16 @@ export default function Home() {
     const normalized = query.trim().toLowerCase();
     return works.works.filter(work => {
       if (work.status !== tab) return false;
+      if (buckets.length > 0) {
+        const balde = work.companyId ?? "private";
+        if (!buckets.includes(balde)) return false;
+      }
       if (!normalized) return true;
       return `${work.street} ${work.city} ${work.zip} ${work.code} ${work.service}`
         .toLowerCase()
         .includes(normalized);
     });
-  }, [works.works, query, tab]);
+  }, [works.works, query, tab, buckets]);
 
   const openWork = byId(openWorkId);
   const navigationWork = byId(navigationWorkId);
@@ -54,10 +63,8 @@ export default function Home() {
     formState?.kind === "edit" ? byId(formState.workId) : undefined;
   const confirmationWork = byId(confirmation?.workId ?? null);
   const sharingWork = byId(sharingWorkId);
-  // Ninguém compartilha uma obra consigo mesmo.
-  const outrosMembros = (company?.members ?? []).filter(
-    m => m.userId !== works.myId
-  );
+  const nomeDaOrganizacao = (companyId: string | null) =>
+    companies.find(c => c.id === companyId)?.name;
 
   function handleSave(
     input: Parameters<typeof works.createWork>[0],
@@ -113,8 +120,8 @@ export default function Home() {
             key={openWork.id}
             work={openWork}
             isMine={openWork.ownerId === works.myId}
-            sharedCount={openWork.sharedWith.length}
-            onShare={() => setSharingWorkId(openWork.id)}
+            companyName={nomeDaOrganizacao(openWork.companyId)}
+            onChangeOrganization={() => setSharingWorkId(openWork.id)}
             onBack={() => setOpenWorkId(null)}
             onNavigate={() => setNavigationWorkId(openWork.id)}
             onEdit={() => setFormState({ kind: "edit", workId: openWork.id })}
@@ -164,6 +171,15 @@ export default function Home() {
             onAccount={() => setShowAccount(true)}
             onOrganize={() => setOrganizing(true)}
             myId={works.myId}
+            companies={companies}
+            buckets={buckets}
+            onToggleBucket={balde =>
+              setBuckets(atuais =>
+                atuais.includes(balde)
+                  ? atuais.filter(item => item !== balde)
+                  : [...atuais, balde]
+              )
+            }
           />
         )}
       </main>
@@ -189,14 +205,17 @@ export default function Home() {
 
       {showTeam && <CompanySheet onClose={() => setShowTeam(false)} />}
 
-      {sharingWork && company && (
-        <ShareSheet
+      {sharingWork && (
+        <OrganizationSheet
           work={sharingWork}
-          members={outrosMembros}
-          companyName={company.name}
+          companies={companies}
           onClose={() => setSharingWorkId(null)}
-          onSave={(scope, userIds) =>
-            works.setSharing(sharingWork.id, scope, userIds)
+          onSave={companyId =>
+            works.setCompany(
+              sharingWork.id,
+              companyId,
+              nomeDaOrganizacao(companyId)
+            )
           }
         />
       )}

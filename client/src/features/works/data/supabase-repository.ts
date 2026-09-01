@@ -19,8 +19,6 @@ type WorkRow = {
   id: string;
   user_id: string;
   company_id: string | null;
-  share_scope: "private" | "selected" | "company";
-  work_viewers: { user_id: string }[];
   street: string;
   city: string;
   zip: string;
@@ -47,14 +45,13 @@ type WorkRow = {
 };
 
 const SELECT_WORK = `
-  id, user_id, company_id, share_scope,
+  id, user_id, company_id,
   street, city, zip, code, service, description, observations,
   water_available, power_available, start_date, status, completed_at, position, source_lang,
   work_tasks (id, label, done, position),
   work_updates (id, entry_date, text, system_key),
   work_history (id, entry_date, title),
-  work_photos (id, storage_path, position),
-  work_viewers (user_id)
+  work_photos (id, storage_path, position)
 `;
 
 async function currentUserId(): Promise<string> {
@@ -126,8 +123,6 @@ function toWork(
     id: row.id,
     ownerId: row.user_id,
     companyId: row.company_id,
-    shareScope: row.share_scope,
-    sharedWith: row.work_viewers.map(viewer => viewer.user_id),
     street: row.street,
     city: row.city,
     zip: row.zip,
@@ -186,6 +181,7 @@ function toPayload(work: Work) {
     start_date: work.startDate,
     status: work.status,
     position: work.position,
+    company_id: work.companyId,
     // O banco exige completed_at nulo enquanto a obra está em andamento.
     completed_at:
       work.status === "completed" ? (work.completedAt ?? null) : null,
@@ -257,11 +253,10 @@ export const supabaseWorksRepository: WorksRepository = {
     if (error) throw error;
   },
 
-  async setSharing(workId, scope, userIds) {
-    const { error } = await supabase.rpc("set_work_sharing", {
+  async setCompany(workId, companyId) {
+    const { error } = await supabase.rpc("set_work_company", {
       p_work_id: workId,
-      p_scope: scope,
-      p_user_ids: userIds,
+      p_company_id: companyId,
     });
     if (error) throw error;
   },

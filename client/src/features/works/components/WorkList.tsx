@@ -1,7 +1,10 @@
 /** Tela inicial: busca, abas de status e a pilha de fichas. */
 
+import type { Company } from "@/features/company/types";
 import {
   ArrowUpDown,
+  Building2,
+  Lock,
   CloudOff,
   House,
   UserRound,
@@ -34,6 +37,9 @@ export function WorkList({
   onAccount,
   onOrganize,
   myId,
+  companies,
+  buckets,
+  onToggleBucket,
 }: {
   works: Work[];
   activeCount: number;
@@ -52,6 +58,10 @@ export function WorkList({
   onOrganize: () => void;
   /** Id de quem está usando o app, para marcar as obras de outra pessoa. */
   myId: string;
+  companies: Company[];
+  /** Ids das organizações marcadas, mais "private" para as fichas privadas. */
+  buckets: string[];
+  onToggleBucket: (bucket: string) => void;
 }) {
   const t = useT();
   const d = useDates();
@@ -134,6 +144,31 @@ export function WorkList({
         )}
       </div>
 
+      {companies.length > 0 && (
+        <div className="mb-5" role="group" aria-label={t("filter.label")}>
+          <p className="mb-2 font-mono-field text-[9px] font-medium uppercase tracking-[0.15em] text-[#8b9098]">
+            {t("filter.title")}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <BucketChip
+              icon={<Lock size={12} />}
+              label={t("org.private")}
+              active={buckets.includes("private")}
+              onClick={() => onToggleBucket("private")}
+            />
+            {companies.map(empresa => (
+              <BucketChip
+                key={empresa.id}
+                icon={<Building2 size={12} />}
+                label={empresa.name}
+                active={buckets.includes(empresa.id)}
+                onClick={() => onToggleBucket(empresa.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <div
         className="mb-6 grid grid-cols-2 rounded-2xl bg-[#eeeae1] p-1"
         role="tablist"
@@ -203,6 +238,7 @@ export function WorkList({
                 work={work}
                 index={index}
                 isMine={work.ownerId === myId}
+                companyName={companies.find(c => c.id === work.companyId)?.name}
                 onOpen={() => onOpen(work)}
                 onNavigate={() => onNavigate(work)}
               />
@@ -214,6 +250,33 @@ export function WorkList({
         </div>
       </section>
     </div>
+  );
+}
+
+/** Marcador do filtro: privadas ou uma organização. */
+function BucketChip({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-bold transition active:scale-95 ${
+        active
+          ? "border-[#e86a33] bg-[#fff1e9] text-[#a7502b]"
+          : "border-[#e4ded3] bg-white text-[#8a929d]"
+      }`}
+    >
+      {icon} {label}
+    </button>
   );
 }
 
