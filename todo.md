@@ -1,3 +1,24 @@
+# Atualização: apelido e link de convite (1 set 2026)
+
+O e-mail sai como forma de convidar. No lugar entram o apelido e um link.
+
+- [x] Tabela `profiles` com apelido único (sem diferenciar maiúsculas).
+      Gatilho cria o apelido junto com a conta: nunca existe pessoa sem apelido.
+- [x] Apelido visível só para quem divide organização com você — não há
+      listagem geral de apelidos do app.
+- [x] Adicionar pelo apelido, direto na tela de Equipe.
+- [x] Link de convite válido por 7 dias, com copiar, gerar outro e cancelar.
+      Gerar um novo invalida o anterior.
+- [x] Quem abre o link sem conta cria uma e entra na organização em seguida:
+      o token fica guardado na aba e é usado assim que a sessão existe.
+- [x] Convite por e-mail removido, junto com a tabela e a função dele.
+- [x] Testado: adicionar por apelido (inclusive em maiúsculas), apelido
+      inexistente barrado, link entrando, link repetido não duplicando, membro
+      comum sem poder gerar link, link revogado e token inventado barrados.
+
+## Pendente
+- [ ] Ligar "Leaked Password Protection" no Supabase (é um botão no painel).
+
 # Atualização: modelo de organizações (1 set 2026)
 
 Modelo corrigido conforme o recap: a ficha é privada quando não tem

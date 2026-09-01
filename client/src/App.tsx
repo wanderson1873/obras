@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Redirect, Route, Switch } from "wouter";
+import { Redirect, Route, Switch, useLocation } from "wouter";
 import { House, TriangleAlert } from "lucide-react";
 import { supabaseConfigured } from "@/lib/supabase";
 import { I18nProvider, useT } from "./i18n/I18nContext";
@@ -9,6 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { SignInScreen } from "./features/auth/SignInScreen";
 import { useAppUpdate } from "./features/pwa/useAppUpdate";
+import { JoinScreen, takeInviteToken } from "./features/company/JoinScreen";
 import Home from "./pages/Home";
 
 function Router() {
@@ -70,9 +72,41 @@ function MissingConfigScreen() {
 
 function AuthenticatedApp() {
   const { session, loading } = useAuth();
+  const [local, navegar] = useLocation();
   useAppUpdate();
+
+  // O caminho do convite responde antes da barreira de login: quem chega sem
+  // conta precisa poder criar uma e cair dentro da organização em seguida.
+  const doConvite = local.match(/^\/entrar\/([A-Za-z0-9]+)$/);
+  if (doConvite) {
+    return (
+      <JoinScreen
+        token={doConvite[1]}
+        onDone={() => navegar("/", { replace: true })}
+      />
+    );
+  }
+
   if (loading) return <Splash />;
   if (!session) return <SignInScreen />;
+  return <PendingInvite />;
+}
+
+/**
+ * Quem entrou ou criou a conta vindo de um link volta para cá com o token
+ * guardado na aba. Redireciona uma vez para concluir a entrada.
+ */
+function PendingInvite() {
+  const [, navegar] = useLocation();
+  const [conferido, setConferido] = useState(false);
+
+  useEffect(() => {
+    const token = takeInviteToken();
+    if (token) navegar(`/entrar/${token}`, { replace: true });
+    else setConferido(true);
+  }, [navegar]);
+
+  if (!conferido) return <Splash />;
   return <Router />;
 }
 

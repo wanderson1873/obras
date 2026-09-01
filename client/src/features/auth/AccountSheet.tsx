@@ -6,6 +6,7 @@ import {
   Check,
   ChevronRight,
   KeyRound,
+  AtSign,
   Languages,
   Loader2,
   LogOut,
@@ -13,9 +14,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { BottomSheet } from "@/features/works/components/BottomSheet";
-import { useI18n, LANGUAGES, LANGUAGE_NAMES } from "@/i18n/I18nContext";
+import { useI18n, useT, LANGUAGES, LANGUAGE_NAMES } from "@/i18n/I18nContext";
 import { useDates } from "@/i18n/useDates";
 import { useAuth } from "./AuthContext";
+import { useProfile } from "./useProfile";
 
 export function AccountSheet({
   onClose,
@@ -27,6 +29,7 @@ export function AccountSheet({
   const { session, updatePassword, signOut } = useAuth();
   const { t, language, automatic, setLanguage } = useI18n();
   const d = useDates();
+  const perfil = useProfile();
   const [changing, setChanging] = useState(false);
 
   const email = session?.user.email ?? "—";
@@ -54,6 +57,12 @@ export function AccountSheet({
             </p>
           )}
         </div>
+
+        <NicknameField
+          nickname={perfil.nickname}
+          loading={perfil.loading}
+          onSave={perfil.save}
+        />
 
         <div className="rounded-2xl border border-[#e8e2d7] bg-white p-4">
           <p className="mb-2.5 flex items-center gap-2 font-mono-field text-[9px] font-medium uppercase tracking-[0.13em] text-[#8a929d]">
@@ -140,6 +149,110 @@ export function AccountSheet({
         </p>
       </div>
     </BottomSheet>
+  );
+}
+
+/** Apelido: como os colegas encontram a pessoa para adicionar à organização. */
+function NicknameField({
+  nickname,
+  loading,
+  onSave,
+}: {
+  nickname: string | null;
+  loading: boolean;
+  onSave: (nickname: string) => Promise<void>;
+}) {
+  const t = useT();
+  const [editando, setEditando] = useState(false);
+  const [valor, setValor] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function salvar(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      await onSave(valor);
+      setEditando(false);
+      toast.success(t("account.nicknameSaved"));
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : t("account.nicknameInvalid")
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-[#e8e2d7] bg-white p-4">
+      <p className="flex items-center gap-2 font-mono-field text-[9px] font-medium uppercase tracking-[0.13em] text-[#8a929d]">
+        <AtSign size={13} className="text-[#e86a33]" /> {t("account.nickname")}
+      </p>
+
+      {editando ? (
+        <form onSubmit={salvar} className="mt-2 space-y-2">
+          <input
+            value={valor}
+            onChange={event => setValor(event.target.value)}
+            autoCapitalize="none"
+            autoCorrect="off"
+            className="h-11 w-full rounded-xl border border-[#e4ded3] bg-white px-3 text-sm outline-none transition focus:border-[#e86a33]"
+          />
+          {error && (
+            <p
+              role="alert"
+              className="rounded-xl border border-[#f0cfc6] bg-[#fff6f3] px-3 py-2 text-[12px] font-medium text-[#a8462f]"
+            >
+              {error}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setEditando(false)}
+              disabled={busy}
+              className="h-10 flex-1 rounded-xl border border-[#e2dbd0] bg-white text-[12px] font-bold text-[#4c5a6d] transition active:scale-[0.98]"
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              type="submit"
+              disabled={busy}
+              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-[#27374c] text-[12px] font-bold text-white transition active:scale-[0.98] disabled:opacity-70"
+            >
+              {busy ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Check size={14} />
+              )}{" "}
+              {t("common.save")}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="mt-1.5 flex items-center gap-3">
+          <span className="min-w-0 flex-1 truncate text-[15px] font-bold text-[#27374c]">
+            {loading ? "…" : `@${nickname ?? "—"}`}
+          </span>
+          <button
+            onClick={() => {
+              setValor(nickname ?? "");
+              setError(null);
+              setEditando(true);
+            }}
+            className="shrink-0 rounded-xl bg-[#f3f0e9] px-3 py-2 text-[12px] font-bold text-[#4f5c6e] transition active:scale-95"
+          >
+            {t("common.change")}
+          </button>
+        </div>
+      )}
+
+      <p className="mt-2 text-[11px] leading-4 text-[#8a929d]">
+        {t("account.nicknameHint")}
+      </p>
+    </div>
   );
 }
 

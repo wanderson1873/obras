@@ -340,6 +340,41 @@ export const pt = {
 
   // Tradução do conteúdo
   // Organização da ficha
+  // Apelido
+  "account.nickname": "Seu apelido",
+  "account.nicknameHint":
+    "É por ele que seus colegas te adicionam. Letras, números, ponto e sublinhado.",
+  "account.nicknameInvalid": "Use de 3 a 20 caracteres, começando por letra.",
+  "account.nicknameTaken": "Esse apelido já está em uso.",
+  "account.nicknameSaved": "Apelido salvo",
+  // Convite
+  "team.inviteByNickname": "Adicionar pelo apelido",
+  "team.nicknamePlaceholder": "apelido do colega",
+  "team.typeNickname": "Escreva o apelido da pessoa.",
+  "team.nicknameNotFound": "Não existe ninguém com esse apelido.",
+  "team.memberAdded": "{name} entrou na equipe",
+  "team.alreadyMember": "{name} já estava na equipe",
+  "team.inviteLink": "Link de convite",
+  "team.generateLink": "Gerar link",
+  "team.newLink": "Gerar outro",
+  "team.copyLink": "Copiar link",
+  "team.linkCopied": "Link copiado",
+  "team.revokeLink": "Cancelar link",
+  "team.linkRevoked": "Link cancelado",
+  "team.linkExpires": "Vale até {date}",
+  "team.linkHint":
+    "Quem abrir este link entra na organização e passa a ver os códigos de entrada das fichas dela. Mande só para quem é da equipe.",
+  "team.linkFailed": "Não foi possível gerar o link.",
+  // Entrar por convite
+  "join.title": "Convite para equipe",
+  "join.checking": "Conferindo o convite…",
+  "join.joined": "Você entrou na {org}",
+  "join.already": "Você já está na {org}",
+  "join.failed": "Convite inválido ou vencido",
+  "join.failedHint": "Peça um link novo para quem te convidou.",
+  "join.needAccount": "Entre ou crie sua conta para aceitar o convite.",
+  "join.continue": "Ir para as obras",
+
   "org.section": "Organização",
   "org.private": "Privada",
   "org.privateHint": "Só você vê esta ficha.",

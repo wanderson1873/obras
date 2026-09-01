@@ -9,12 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { useT } from "@/i18n/I18nContext";
-import type {
-  Company,
-  CompanyInvite,
-  CompanyMember,
-  MemberRole,
-} from "./types";
+import type { Company, CompanyMember, MemberRole } from "./types";
 
 type LinhaMembro = {
   company_id: string;
@@ -43,11 +38,6 @@ export function useCompanies() {
 
   const load = useCallback(async () => {
     try {
-      // Convite pendente vira participação assim que a pessoa entra no app.
-      const { error: erroConvites } = await supabase.rpc("claim_invites");
-      if (erroConvites)
-        console.warn("Falha ao aceitar convites pendentes.", erroConvites);
-
       const { data: minhas, error } = await supabase
         .from("company_members")
         .select("company_id, user_id, role, display_name, companies (id, name)")
@@ -63,19 +53,19 @@ export function useCompanies() {
 
       const ids = comEmpresa.map(l => l.companies!.id);
 
-      const [{ data: todosMembros }, { data: convites }] = await Promise.all([
+      const [{ data: todosMembros }, { data: links }] = await Promise.all([
         supabase
           .from("company_members")
           .select("company_id, user_id, role, display_name")
           .in("company_id", ids)
           .order("created_at"),
-        // O RLS devolve só os convites das organizações onde a pessoa é administradora.
+        // O RLS devolve só os links das organizações onde a pessoa é administradora.
         supabase
-          .from("company_invites")
-          .select("id, company_id, email, role, created_at")
+          .from("company_invite_links")
+          .select("company_id, token, expires_at")
           .in("company_id", ids)
-          .is("accepted_at", null)
-          .order("created_at"),
+          .is("revoked_at", null)
+          .gt("expires_at", new Date().toISOString()),
       ]);
 
       setCompanies(
@@ -86,14 +76,14 @@ export function useCompanies() {
           members: (todosMembros ?? [])
             .filter(m => m.company_id === linha.companies!.id)
             .map(toMember),
-          pendingInvites: (convites ?? [])
-            .filter(c => c.company_id === linha.companies!.id)
-            .map((c): CompanyInvite => ({
-              id: c.id,
-              email: c.email,
-              role: c.role as MemberRole,
-              createdAt: c.created_at,
-            })),
+          inviteLink: (() => {
+            const link = (links ?? []).find(
+              l => l.company_id === linha.companies!.id
+            );
+            return link
+              ? { token: link.token, expiresAt: link.expires_at }
+              : null;
+          })(),
         }))
       );
     } catch (caught) {
@@ -119,30 +109,41 @@ export function useCompanies() {
     [load]
   );
 
-  const invite = useCallback(
-    async (companyId: string, email: string, role: MemberRole) => {
-      const { error } = await supabase.from("company_invites").insert({
-        company_id: companyId,
-        email: email.trim().toLowerCase(),
-        role,
-        invited_by: (await supabase.auth.getUser()).data.user?.id,
+  /** Adiciona alguém que já tem conta, pelo apelido. */
+  const addByNickname = useCallback(
+    async (companyId: string, nickname: string) => {
+      const { data, error } = await supabase.rpc("add_member_by_nickname", {
+        p_company_id: companyId,
+        p_nickname: nickname.trim(),
       });
-      if (error) {
-        // Chave única no par (organização, e-mail): convite repetido cai aqui.
-        if (error.code === "23505") throw new Error(t("team.inviteDuplicate"));
-        throw error;
-      }
+      if (error) throw new Error(error.message);
       await load();
+      const linha = Array.isArray(data) ? data[0] : data;
+      return {
+        nickname: linha?.nickname ?? nickname,
+        alreadyMember: Boolean(linha?.already_member),
+      };
     },
-    [load, t]
+    [load]
   );
 
-  const cancelInvite = useCallback(
-    async (inviteId: string) => {
-      const { error } = await supabase
-        .from("company_invites")
-        .delete()
-        .eq("id", inviteId);
+  /** Gera um link novo, invalidando o anterior da mesma organização. */
+  const createInviteLink = useCallback(
+    async (companyId: string) => {
+      const { error } = await supabase.rpc("create_invite_link", {
+        p_company_id: companyId,
+      });
+      if (error) throw error;
+      await load();
+    },
+    [load]
+  );
+
+  const revokeInviteLink = useCallback(
+    async (companyId: string) => {
+      const { error } = await supabase.rpc("revoke_invite_link", {
+        p_company_id: companyId,
+      });
       if (error) throw error;
       await load();
     },
@@ -184,8 +185,9 @@ export function useCompanies() {
     loading,
     refresh: load,
     createCompany,
-    invite,
-    cancelInvite,
+    addByNickname,
+    createInviteLink,
+    revokeInviteLink,
     removeMember,
     leave,
   };

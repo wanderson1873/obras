@@ -9,11 +9,10 @@ export type CompanyMember = {
   displayName: string;
 };
 
-export type CompanyInvite = {
-  id: string;
-  email: string;
-  role: MemberRole;
-  createdAt: string;
+/** Link de convite válido da organização. Nulo quando não há nenhum ativo. */
+export type InviteLink = {
+  token: string;
+  expiresAt: string;
 };
 
 export type Company = {
@@ -22,6 +21,6 @@ export type Company = {
   /** Papel de quem está usando o app agora. */
   myRole: MemberRole;
   members: CompanyMember[];
-  /** Convites ainda não aceitos. Só o administrador enxerga. */
-  pendingInvites: CompanyInvite[];
+  /** Link de convite ativo. Só o administrador enxerga. */
+  inviteLink: InviteLink | null;
 };
