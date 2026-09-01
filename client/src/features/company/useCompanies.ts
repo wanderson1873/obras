@@ -45,7 +45,17 @@ export function useCompanies() {
       if (error) throw error;
 
       const linhas = (minhas ?? []) as unknown as LinhaMembro[];
-      const comEmpresa = linhas.filter(l => l.companies);
+      /*
+       * Uma linha por vínculo. Se um vínculo repetido escapar para o banco, a
+       * organização apareceria duas vezes na tela — aqui ela aparece uma só.
+       */
+      const vistas = new Set<string>();
+      const comEmpresa = linhas.filter(l => {
+        if (!l.companies) return false;
+        if (vistas.has(l.companies.id)) return false;
+        vistas.add(l.companies.id);
+        return true;
+      });
       if (comEmpresa.length === 0) {
         setCompanies([]);
         return;

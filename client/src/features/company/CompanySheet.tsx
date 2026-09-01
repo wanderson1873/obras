@@ -1,6 +1,6 @@
 /** Organizações: quem participa de cada uma, convites e criação de novas. */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   AtSign,
   Building2,
@@ -368,11 +368,18 @@ function CreateCompanyForm({
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * Desabilitar o botão depende do próximo render; dois toques rápidos passam
+   * antes disso e criam duas organizações. Esta trava vale no mesmo instante.
+   */
+  const enviando = useRef(false);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (enviando.current) return;
     if (!name.trim()) return setError(t("team.typeCompanyName"));
     setError(null);
+    enviando.current = true;
     setBusy(true);
     try {
       await onCreate(name);
@@ -382,6 +389,7 @@ function CreateCompanyForm({
         caught instanceof Error ? caught.message : t("team.createFailed")
       );
     } finally {
+      enviando.current = false;
       setBusy(false);
     }
   }
