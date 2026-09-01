@@ -9,8 +9,10 @@
  * As duas compartilham um sessionToken. O Google cobra a sessão inteira como
  * uma consulta só, em vez de uma por tecla digitada.
  *
- * Segredo necessário: GOOGLE_TRANSLATE_API_KEY (mesma chave do projeto, com a
- * Places API habilitada).
+ * Segredo: GOOGLE_PLACES_API_KEY. Chave separada da tradução de propósito —
+ * cada uma fica restrita à sua própria API, então uma chave vazada não dá
+ * acesso ao outro serviço. Enquanto o segredo não existir, cai na chave da
+ * tradução, que era o arranjo anterior.
  */
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
@@ -108,7 +110,8 @@ async function detalhar(chave: string, placeId: string, sessionToken: string) {
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
 
-  const chave = Deno.env.get("GOOGLE_TRANSLATE_API_KEY");
+  const chave =
+    Deno.env.get("GOOGLE_PLACES_API_KEY") ?? Deno.env.get("GOOGLE_TRANSLATE_API_KEY");
   if (!chave) return responder({ error: "Busca de endereço não configurada." }, 503);
 
   let corpo: { action?: string; query?: string; placeId?: string; sessionToken?: string };
