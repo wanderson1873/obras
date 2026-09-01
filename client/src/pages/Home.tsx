@@ -68,7 +68,8 @@ export default function Home() {
 
   function handleSave(
     input: Parameters<typeof works.createWork>[0],
-    firstTask?: string
+    firstTask?: string,
+    companyId?: string | null
   ) {
     if (formState?.kind === "edit" && editingWork) {
       works.editWork(editingWork.id, input);
@@ -76,12 +77,18 @@ export default function Home() {
       toast.success(t("toast.workUpdated"));
       return;
     }
-    const created = works.createWork(input, firstTask);
+    const destino = companyId ?? null;
+    const created = works.createWork(input, firstTask, destino);
     setFormState(null);
     setTab("active");
     setQuery("");
     setOpenWorkId(created.id);
-    toast.success(t("toast.workCreated"));
+    toast.success(t("toast.workCreated"), {
+      // Onde a ficha foi parar decide quem a enxerga: vale dizer em voz alta.
+      description: destino
+        ? t("org.belongsTo", { org: nomeDaOrganizacao(destino) ?? "" })
+        : t("org.private"),
+    });
   }
 
   function handleConfirm() {
@@ -188,6 +195,7 @@ export default function Home() {
         <WorkFormSheet
           key={formState.kind === "edit" ? formState.workId : "new"}
           work={editingWork ?? undefined}
+          companies={companies}
           onClose={() => setFormState(null)}
           onSave={handleSave}
         />

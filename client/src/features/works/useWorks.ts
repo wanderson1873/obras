@@ -134,7 +134,11 @@ export function useWorks() {
   );
 
   const createWork = useCallback(
-    (input: WorkInput, firstTask?: string): Work => {
+    (
+      input: WorkInput,
+      firstTask?: string,
+      companyId: string | null = null
+    ): Work => {
       // A ficha nova entra no topo: acabou de ser criada, é o que interessa agora.
       const menorPosicao = worksRef.current.reduce(
         (menor, item) => Math.min(menor, item.position),
@@ -144,8 +148,8 @@ export function useWorks() {
         ...input,
         id: newId(),
         ownerId: myId,
-        // Ficha nasce privada; mover para uma organização é uma escolha à parte.
-        companyId: null,
+        // Onde a ficha nasce é escolhido no formulário; sem organização, privada.
+        companyId,
         sourceLang: null,
         translation: null,
         status: "active",

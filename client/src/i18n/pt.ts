@@ -228,6 +228,9 @@ export const pt = {
   "form.cityPlaceholder": "Woonsocket",
   "form.zip": "CEP",
   "form.zipPlaceholder": "02895",
+  "form.destination": "Onde salvar esta ficha",
+  "form.destinationNoOrgs":
+    "Você ainda não participa de nenhuma organização, então a ficha fica só sua.",
   "form.code": "Código de acesso (opcional)",
   "form.codePlaceholder": "Ex.: 2486",
   "form.startDate": "Data de início",

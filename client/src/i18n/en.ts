@@ -221,6 +221,9 @@ export const en: Translations = {
   "form.cityPlaceholder": "Woonsocket",
   "form.zip": "ZIP",
   "form.zipPlaceholder": "02895",
+  "form.destination": "Where to save this job",
+  "form.destinationNoOrgs":
+    "You are not in any organization yet, so this job stays yours alone.",
   "form.code": "Entry code (optional)",
   "form.codePlaceholder": "e.g. 2486",
   "form.startDate": "Start date",

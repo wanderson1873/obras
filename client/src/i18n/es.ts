@@ -223,6 +223,9 @@ export const es: Translations = {
   "form.cityPlaceholder": "Woonsocket",
   "form.zip": "Código postal",
   "form.zipPlaceholder": "02895",
+  "form.destination": "Dónde guardar esta obra",
+  "form.destinationNoOrgs":
+    "Todavía no participas en ninguna organización, así que la obra queda solo tuya.",
   "form.code": "Código de entrada (opcional)",
   "form.codePlaceholder": "Ej.: 2486",
   "form.startDate": "Fecha de inicio",

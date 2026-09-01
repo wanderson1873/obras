@@ -2,9 +2,10 @@
 
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { Check, Droplets, Zap } from "lucide-react";
+import { Building2, Check, Droplets, Lock, Zap } from "lucide-react";
 import { todayIso } from "@/lib/dates";
 import { useT } from "@/i18n/I18nContext";
+import type { Company } from "@/features/company/types";
 import type { Work, WorkInput } from "@/features/works/types";
 import { BottomSheet } from "./BottomSheet";
 import { AddressSearch, type AddressParts } from "./AddressSearch";
@@ -62,15 +63,27 @@ function formFromWork(work?: Work): WorkInput {
 
 export function WorkFormSheet({
   work,
+  companies,
   onClose,
   onSave,
 }: {
   work?: Work;
+  companies: Company[];
   onClose: () => void;
-  onSave: (form: WorkInput, firstTask?: string) => void;
+  onSave: (
+    form: WorkInput,
+    firstTask?: string,
+    companyId?: string | null
+  ) => void;
 }) {
   const t = useT();
   const [form, setForm] = useState<WorkInput>(() => formFromWork(work));
+  /**
+   * Onde a ficha vai nascer. Privada por padrão: é a escolha que não
+   * surpreende ninguém, já que abrir para a organização muda quem enxerga.
+   * Quem já tem ficha muda isso pelo botão de organização, não por aqui.
+   */
+  const [destino, setDestino] = useState<string | null>(null);
   const [includeChecklist, setIncludeChecklist] = useState(false);
   const [firstTask, setFirstTask] = useState("");
   const [errors, setErrors] = useState<Partial<Record<RequiredField, string>>>(
@@ -107,7 +120,7 @@ export function WorkFormSheet({
     if (!form.service.trim()) next.service = t("common.required");
     setErrors(next);
     if (Object.keys(next).length) return;
-    onSave(form, includeChecklist ? firstTask : undefined);
+    onSave(form, includeChecklist ? firstTask : undefined, destino);
   };
 
   return (
@@ -260,6 +273,38 @@ export function WorkFormSheet({
           </>
         )}
 
+        {!work && (
+          <section className="rounded-2xl bg-[#f3f0e9] p-3">
+            <p className="mb-3 font-mono-field text-[10px] font-medium uppercase tracking-[0.13em] text-[#657185]">
+              {t("form.destination")}
+            </p>
+            <div className="space-y-2">
+              <Destino
+                icon={<Lock size={15} />}
+                title={t("org.private")}
+                description={t("org.privateHint")}
+                active={destino === null}
+                onClick={() => setDestino(null)}
+              />
+              {companies.map(empresa => (
+                <Destino
+                  key={empresa.id}
+                  icon={<Building2 size={15} />}
+                  title={empresa.name}
+                  description={t("org.belongsToHint")}
+                  active={destino === empresa.id}
+                  onClick={() => setDestino(empresa.id)}
+                />
+              ))}
+            </div>
+            {companies.length === 0 && (
+              <p className="mt-2.5 text-[11px] leading-4 text-[#78828f]">
+                {t("form.destinationNoOrgs")}
+              </p>
+            )}
+          </section>
+        )}
+
         <button
           onClick={submit}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#27374c] text-sm font-bold text-white shadow-[0_8px_18px_rgba(39,55,76,0.2)] transition active:scale-[0.98]"
@@ -370,5 +415,46 @@ function ConditionToggle({
         </button>
       </div>
     </div>
+  );
+}
+
+/** Uma escolha de onde a ficha vai ficar. */
+function Destino({
+  icon,
+  title,
+  description,
+  active,
+  onClick,
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition active:scale-[0.98] ${
+        active ? "border-[#e86a33] bg-[#fff8f4]" : "border-[#e7e1d7] bg-white"
+      }`}
+    >
+      <span
+        className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl ${
+          active ? "bg-[#e86a33] text-white" : "bg-[#f3f0e9] text-[#5d6878]"
+        }`}
+      >
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-bold text-[#354357]">
+          {title}
+        </span>
+        <span className="block text-[11px] leading-4 text-[#78828f]">
+          {description}
+        </span>
+      </span>
+    </button>
   );
 }
