@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Building2,
   Check,
+  ChevronDown,
   ChevronRight,
   KeyRound,
   AtSign,
@@ -14,7 +15,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { BottomSheet } from "@/features/works/components/BottomSheet";
-import { useI18n, useT, LANGUAGES, LANGUAGE_NAMES } from "@/i18n/I18nContext";
+import {
+  useI18n,
+  useT,
+  LANGUAGES,
+  LANGUAGE_NAMES,
+  type Language,
+} from "@/i18n/I18nContext";
 import { useDates } from "@/i18n/useDates";
 import { useAuth } from "./AuthContext";
 import { useProfile } from "./useProfile";
@@ -64,37 +71,42 @@ export function AccountSheet({
           onSave={perfil.save}
         />
 
-        <div className="rounded-2xl border border-[#e8e2d7] bg-white p-4">
-          <p className="mb-2.5 flex items-center gap-2 font-mono-field text-[9px] font-medium uppercase tracking-[0.13em] text-[#8a929d]">
-            <Languages size={13} className="text-[#e86a33]" />{" "}
+        {/*
+          Um <select> nativo, transparente por cima da linha: fica com a cara do
+          resto do app e, no celular, abre o seletor do próprio sistema — que é
+          melhor de usar com o dedo do que qualquer lista que eu desenhasse.
+        */}
+        <label className="relative flex h-12 w-full items-center gap-3 rounded-2xl border border-[#e8e2d7] bg-white px-3.5">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#f3f0e9] text-[#e86a33]">
+            <Languages size={15} />
+          </span>
+          <span className="flex-1 text-sm font-bold text-[#354357]">
             {t("account.language")}
-          </p>
-          <div className="grid grid-cols-3 gap-1 rounded-xl bg-[#f3f0e9] p-1">
-            {LANGUAGES.map(idioma => (
-              <button
-                key={idioma}
-                onClick={() => setLanguage(idioma)}
-                className={`h-9 rounded-lg text-[12px] font-bold transition ${
-                  !automatic && language === idioma
-                    ? "bg-white text-[#27374c] shadow-sm"
-                    : "text-[#87909b]"
-                }`}
-              >
-                {LANGUAGE_NAMES[idioma]}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setLanguage(null)}
-            className={`mt-2 w-full rounded-lg py-1.5 text-[12px] font-semibold transition ${
-              automatic ? "text-[#43825c]" : "text-[#8a929d]"
-            }`}
+          </span>
+          <span className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[#647084]">
+            {LANGUAGE_NAMES[language]}
+            <ChevronDown size={16} className="text-[#b3bac3]" />
+          </span>
+          <select
+            aria-label={t("account.language")}
+            value={automatic ? "auto" : language}
+            onChange={event =>
+              setLanguage(
+                event.target.value === "auto"
+                  ? null
+                  : (event.target.value as Language)
+              )
+            }
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           >
-            {automatic
-              ? `✓ ${t("account.languageAuto")}`
-              : t("account.languageAuto")}
-          </button>
-        </div>
+            <option value="auto">{t("account.languageAuto")}</option>
+            {LANGUAGES.map(idioma => (
+              <option key={idioma} value={idioma}>
+                {LANGUAGE_NAMES[idioma]}
+              </option>
+            ))}
+          </select>
+        </label>
 
         <button
           onClick={onOpenTeam}

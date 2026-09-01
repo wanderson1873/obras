@@ -1,3 +1,12 @@
+# Ajuste: seletor de idioma padrão (1 set 2026)
+
+- [x] Trocar os três botões lado a lado por uma linha "Idioma  Português ⌄",
+      igual às linhas de Equipe e Alterar senha.
+- [x] "Igual ao aparelho" virou a primeira opção da lista, em vez de um botão
+      separado embaixo.
+- [x] Por baixo é um <select> nativo transparente: no celular abre o seletor do
+      próprio sistema, melhor de usar com o dedo do que uma lista desenhada.
+
 # Atualização: apelido e link de convite (1 set 2026)
 
 O e-mail sai como forma de convidar. No lugar entram o apelido e um link.
