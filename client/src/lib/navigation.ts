@@ -14,8 +14,14 @@ export function fullAddress(
   work: Pick<Work, "street" | "unit" | "city" | "state" | "zip">
 ) {
   // O apartamento entra junto da rua: é assim que os apps de mapa entendem.
-  const rua = [work.street, work.unit].map(p => p?.trim()).filter(Boolean).join(" ");
-  const regiao = [work.city, work.state].map(p => p?.trim()).filter(Boolean).join(", ");
+  const rua = [work.street, work.unit]
+    .map(p => p?.trim())
+    .filter(Boolean)
+    .join(" ");
+  const regiao = [work.city, work.state]
+    .map(p => p?.trim())
+    .filter(Boolean)
+    .join(", ");
   return [rua, regiao, work.zip?.trim()].filter(Boolean).join(", ");
 }
 
@@ -57,6 +63,30 @@ export function navigationApps(): NavigationApp[] {
   return APPS.filter(app => app.id !== "apple");
 }
 
+/** O app foi instalado na tela inicial, em vez de aberto numa aba do navegador. */
+function isStandalone() {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(display-mode: standalone)").matches === true ||
+    window.matchMedia?.("(display-mode: fullscreen)").matches === true ||
+    // iOS antes do display-mode.
+    (navigator as unknown as { standalone?: boolean }).standalone === true
+  );
+}
+
 export function openRoute(app: NavigationApp, address: string) {
-  window.open(app.buildUrl(address), "_blank", "noopener,noreferrer");
+  const url = app.buildUrl(address);
+
+  if (isStandalone()) {
+    /*
+     * Instalado, window.open abre uma janela dentro do próprio app. O Waze
+     * assume o link e sai na frente, mas a janela vazia fica para trás — a
+     * tela branca com um x no topo. Trocando a própria página pelo link, quem
+     * atende é o sistema: o Waze abre e nada sobra por cima.
+     */
+    window.location.href = url;
+    return;
+  }
+
+  window.open(url, "_blank", "noopener,noreferrer");
 }
