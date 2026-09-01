@@ -57,8 +57,13 @@ export type Work = {
    * organização vê, edita e conclui.
    */
   companyId: string | null;
+  /** Número e rua: "20 Eastern Ave". */
   street: string;
+  /** Apartamento, suíte ou unidade. Opcional. */
+  unit: string;
   city: string;
+  /** Sigla do estado: "RI". */
+  state: string;
   zip: string;
   /** Código do portão / lockbox. Opcional. */
   code: string;
@@ -89,7 +94,9 @@ export type Work = {
 export type WorkInput = Pick<
   Work,
   | "street"
+  | "unit"
   | "city"
+  | "state"
   | "zip"
   | "code"
   | "service"

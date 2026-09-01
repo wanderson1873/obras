@@ -10,11 +10,13 @@ export type NavigationApp = {
   buildUrl: (address: string) => string;
 };
 
-export function fullAddress(work: Pick<Work, "street" | "city" | "zip">) {
-  return [work.street, work.city, work.zip]
-    .map(part => part?.trim())
-    .filter(Boolean)
-    .join(", ");
+export function fullAddress(
+  work: Pick<Work, "street" | "unit" | "city" | "state" | "zip">
+) {
+  // O apartamento entra junto da rua: é assim que os apps de mapa entendem.
+  const rua = [work.street, work.unit].map(p => p?.trim()).filter(Boolean).join(" ");
+  const regiao = [work.city, work.state].map(p => p?.trim()).filter(Boolean).join(", ");
+  return [rua, regiao, work.zip?.trim()].filter(Boolean).join(", ");
 }
 
 const APPS: NavigationApp[] = [

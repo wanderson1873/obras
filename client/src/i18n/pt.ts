@@ -205,14 +205,27 @@ export const pt = {
   "detail.deleteWork": "Apagar ficha",
 
   // Formulário
+  // Endereço
+  "form.addressSearch": "Buscar endereço",
+  "form.addressSearchPlaceholder": "Digite o número e a rua",
+  "form.searching": "Procurando…",
+  "form.noSuggestions": "Nenhum endereço encontrado. Preencha à mão abaixo.",
+  "form.unit": "Apartamento",
+  "form.unitPlaceholder": "opcional",
+  "form.state": "Estado",
+  "form.statePlaceholder": "RI",
+  "form.addressPicked": "Endereço preenchido",
+  "form.addressLookupOff":
+    "A busca de endereço não está ligada. Preencha à mão.",
+
   "form.newTitle": "Nova ficha",
   "form.editTitle": "Editar ficha",
   "form.newEyebrow": "Dados da obra",
   "form.editEyebrow": "Ajustar dados",
-  "form.street": "Endereço",
+  "form.street": "Número / Rua",
   "form.streetPlaceholder": "Ex.: 187 Park Ave",
-  "form.city": "Cidade / Estado",
-  "form.cityPlaceholder": "Woonsocket, RI",
+  "form.city": "Cidade",
+  "form.cityPlaceholder": "Woonsocket",
   "form.zip": "CEP",
   "form.zipPlaceholder": "02895",
   "form.code": "Código de acesso (opcional)",

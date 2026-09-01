@@ -20,7 +20,9 @@ type WorkRow = {
   user_id: string;
   company_id: string | null;
   street: string;
+  unit: string;
   city: string;
+  state: string;
   zip: string;
   code: string;
   service: string;
@@ -46,7 +48,7 @@ type WorkRow = {
 
 const SELECT_WORK = `
   id, user_id, company_id,
-  street, city, zip, code, service, description, observations,
+  street, unit, city, state, zip, code, service, description, observations,
   water_available, power_available, start_date, status, completed_at, position, source_lang,
   work_tasks (id, label, done, position),
   work_updates (id, entry_date, text, system_key),
@@ -124,7 +126,9 @@ function toWork(
     ownerId: row.user_id,
     companyId: row.company_id,
     street: row.street,
+    unit: row.unit,
     city: row.city,
+    state: row.state,
     zip: row.zip,
     code: row.code,
     service: row.service,
@@ -170,7 +174,9 @@ function toPayload(work: Work) {
   return {
     id: work.id,
     street: work.street,
+    unit: work.unit,
     city: work.city,
+    state: work.state,
     zip: work.zip,
     code: work.code,
     service: work.service,

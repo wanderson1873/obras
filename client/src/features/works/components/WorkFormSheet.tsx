@@ -1,18 +1,22 @@
 /** Criação e edição de ficha. Só endereço, cidade e resumo são obrigatórios. */
 
 import { useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import { Check, Droplets, Zap } from "lucide-react";
 import { todayIso } from "@/lib/dates";
 import { useT } from "@/i18n/I18nContext";
 import type { Work, WorkInput } from "@/features/works/types";
 import { BottomSheet } from "./BottomSheet";
+import { AddressSearch, type AddressParts } from "./AddressSearch";
 
 type RequiredField = "street" | "city" | "service";
 
 function emptyForm(): WorkInput {
   return {
     street: "",
+    unit: "",
     city: "",
+    state: "",
     zip: "",
     code: "",
     service: "",
@@ -28,7 +32,9 @@ function formFromWork(work?: Work): WorkInput {
   if (!work) return emptyForm();
   const {
     street,
+    unit,
     city,
+    state,
     zip,
     code,
     service,
@@ -40,7 +46,9 @@ function formFromWork(work?: Work): WorkInput {
   } = work;
   return {
     street,
+    unit,
     city,
+    state,
     zip,
     code,
     service,
@@ -77,6 +85,21 @@ export function WorkFormSheet({
     if (value.trim()) setErrors(current => ({ ...current, [key]: undefined }));
   };
 
+  /** Preenche os campos com o endereço escolhido na busca. */
+  const preencherEndereco = (endereco: AddressParts) => {
+    setForm(atual => ({
+      ...atual,
+      street: endereco.street || atual.street,
+      // O apartamento raramente vem do Google; não apaga o que foi digitado.
+      unit: endereco.unit || atual.unit,
+      city: endereco.city || atual.city,
+      state: endereco.state || atual.state,
+      zip: endereco.zip || atual.zip,
+    }));
+    setErrors({});
+    toast.success(t("form.addressPicked"), { description: endereco.formatted });
+  };
+
   const submit = () => {
     const next: Partial<Record<RequiredField, string>> = {};
     if (!form.street.trim()) next.street = t("common.required");
@@ -96,16 +119,26 @@ export function WorkFormSheet({
       centerOnDesktop
     >
       <div className="space-y-4">
-        <Field
-          label={t("form.street")}
-          required
-          value={form.street}
-          error={errors.street}
-          placeholder={t("form.streetPlaceholder")}
-          onChange={value => setRequired("street", value)}
-        />
+        <AddressSearch onPick={preencherEndereco} />
 
-        <div className="grid grid-cols-[1fr_92px] gap-3">
+        <div className="grid grid-cols-[1fr_110px] gap-3">
+          <Field
+            label={t("form.street")}
+            required
+            value={form.street}
+            error={errors.street}
+            placeholder={t("form.streetPlaceholder")}
+            onChange={value => setRequired("street", value)}
+          />
+          <Field
+            label={t("form.unit")}
+            value={form.unit}
+            placeholder={t("form.unitPlaceholder")}
+            onChange={value => set("unit", value)}
+          />
+        </div>
+
+        <div className="grid grid-cols-[1fr_70px_92px] gap-3">
           <Field
             label={t("form.city")}
             required
@@ -113,6 +146,12 @@ export function WorkFormSheet({
             error={errors.city}
             placeholder={t("form.cityPlaceholder")}
             onChange={value => setRequired("city", value)}
+          />
+          <Field
+            label={t("form.state")}
+            value={form.state}
+            placeholder={t("form.statePlaceholder")}
+            onChange={value => set("state", value)}
           />
           <Field
             label={t("form.zip")}
