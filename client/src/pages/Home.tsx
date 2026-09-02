@@ -12,6 +12,8 @@ import { useWorks } from "@/features/works/useWorks";
 import { AccountSheet } from "@/features/auth/AccountSheet";
 import { OrganizationSheet } from "@/features/works/components/OrganizationSheet";
 import { useCompanies } from "@/features/company/useCompanies";
+import { useActivity } from "@/features/activity/useActivity";
+import { ActivitySheet } from "@/features/activity/ActivitySheet";
 import { useT } from "@/i18n/I18nContext";
 import { CompanySheet } from "@/features/company/CompanySheet";
 import type { Work, WorkStatus } from "@/features/works/types";
@@ -23,6 +25,7 @@ export default function Home() {
   const t = useT();
   const { companies } = useCompanies();
   const works = useWorks();
+  const activity = useActivity();
   const [tab, setTab] = useState<WorkStatus>("active");
   const [query, setQuery] = useState("");
   const [openWorkId, setOpenWorkId] = useState<string | null>(null);
@@ -38,6 +41,7 @@ export default function Home() {
    */
   const [buckets, setBuckets] = useState<string[]>([]);
   const [showTeam, setShowTeam] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
 
   const byId = (id: string | null) =>
     id ? (works.works.find(work => work.id === id) ?? null) : null;
@@ -90,6 +94,7 @@ export default function Home() {
     }
     const destino = companyId ?? null;
     const created = works.createWork(input, firstTask, destino);
+    void activity.refresh();
     setFormState(null);
     setTab("active");
     setQuery("");
@@ -191,6 +196,12 @@ export default function Home() {
             myId={works.myId}
             companies={companies}
             buckets={buckets}
+            onOpenActivity={() => {
+              setShowActivity(true);
+              // Abrir já é ter visto: o contador zera aqui, a lista continua.
+              void activity.markSeen();
+            }}
+            unseenActivity={activity.unseenCount}
             onToggleBucket={balde =>
               setBuckets(atuais =>
                 atuais.includes(balde)
@@ -226,6 +237,18 @@ export default function Home() {
       )}
 
       {showTeam && <CompanySheet onClose={() => setShowTeam(false)} />}
+
+      {showActivity && (
+        <ActivitySheet
+          items={activity.items}
+          onOpenWork={workId => {
+            setShowActivity(false);
+            setTab("active");
+            setOpenWorkId(workId);
+          }}
+          onClose={() => setShowActivity(false)}
+        />
+      )}
 
       {sharingWork && (
         <OrganizationSheet

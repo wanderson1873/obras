@@ -3,14 +3,15 @@
 import type { Company } from "@/features/company/types";
 import {
   ArrowUpDown,
+  Bell,
   Building2,
-  Lock,
   CloudOff,
   House,
-  UserRound,
+  Lock,
   Plus,
   RefreshCw,
   Search,
+  UserRound,
   X,
 } from "lucide-react";
 import { todayIso } from "@/lib/dates";
@@ -40,6 +41,8 @@ export function WorkList({
   companies,
   buckets,
   onToggleBucket,
+  onOpenActivity,
+  unseenActivity,
 }: {
   works: Work[];
   activeCount: number;
@@ -62,6 +65,9 @@ export function WorkList({
   /** Ids das organizações marcadas, mais "private" para as fichas privadas. */
   buckets: string[];
   onToggleBucket: (bucket: string) => void;
+  onOpenActivity: () => void;
+  /** Quantos avisos a pessoa ainda não viu. Zero esconde o contador. */
+  unseenActivity: number;
 }) {
   const t = useT();
   const d = useDates();
@@ -88,6 +94,20 @@ export function WorkList({
               {d.dayMonth(todayIso())}
             </p>
           </div>
+          {companies.length > 0 && (
+            <button
+              onClick={onOpenActivity}
+              aria-label={t("activity.open")}
+              className="relative grid h-9 w-9 place-items-center rounded-full bg-[#f0ece4] text-[#5d6878] transition active:scale-90"
+            >
+              <Bell size={16} />
+              {unseenActivity > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-[#e86a33] px-1 font-mono-field text-[9px] font-bold text-white ring-2 ring-[#fbfaf7]">
+                  {unseenActivity > 9 ? "9+" : unseenActivity}
+                </span>
+              )}
+            </button>
+          )}
           <button
             onClick={onAccount}
             aria-label={t("list.myAccount")}
