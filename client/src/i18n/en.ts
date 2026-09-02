@@ -385,6 +385,13 @@ export const en: Translations = {
   "org.failed": "Could not change the organization",
   "org.noneYet": "You are not in any organization yet.",
   "org.createAnother": "Create another organization",
+  "org.deleteOrg": "Delete this organization",
+  "org.deleteConfirm":
+    "Delete {org}? Everyone in it loses access, and its jobs go back to being private to whoever created them.",
+  "org.deleted": "Organization deleted",
+  "org.deletedHint":
+    "The jobs went back to being private to whoever created them.",
+  "org.deleteFailed": "Could not delete the organization",
   "org.leave": "Leave this organization",
   "org.leaveConfirm": "Leave {org}?",
   "org.leaveBody": "You stop seeing its jobs. The ones you created stay yours.",

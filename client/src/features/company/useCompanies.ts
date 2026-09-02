@@ -16,7 +16,7 @@ type LinhaMembro = {
   user_id: string;
   role: MemberRole;
   display_name: string;
-  companies: { id: string; name: string } | null;
+  companies: { id: string; name: string; created_by: string } | null;
 };
 
 function toMember(row: {
@@ -40,7 +40,9 @@ export function useCompanies() {
     try {
       const { data: minhas, error } = await supabase
         .from("company_members")
-        .select("company_id, user_id, role, display_name, companies (id, name)")
+        .select(
+          "company_id, user_id, role, display_name, companies (id, name, created_by)"
+        )
         .order("created_at");
       if (error) throw error;
 
@@ -82,6 +84,7 @@ export function useCompanies() {
         comEmpresa.map(linha => ({
           id: linha.companies!.id,
           name: linha.companies!.name,
+          createdBy: linha.companies!.created_by,
           myRole: linha.role,
           members: (todosMembros ?? [])
             .filter(m => m.company_id === linha.companies!.id)
@@ -174,6 +177,22 @@ export function useCompanies() {
     [load, t]
   );
 
+  /**
+   * Apagar a organização. Só quem criou consegue, e é o que ela faz no lugar
+   * de sair. As fichas voltam a ser privadas de quem as criou — nada se perde.
+   */
+  const deleteCompany = useCallback(
+    async (companyId: string) => {
+      const { error } = await supabase.rpc("delete_company", {
+        p_company_id: companyId,
+      });
+      if (error) throw error;
+      await load();
+      toast.success(t("org.deleted"), { description: t("org.deletedHint") });
+    },
+    [load, t]
+  );
+
   /** Sair por conta própria. As fichas que a pessoa criou continuam dela. */
   const leave = useCallback(
     async (companyId: string) => {
@@ -195,6 +214,7 @@ export function useCompanies() {
     loading,
     refresh: load,
     createCompany,
+    deleteCompany,
     addByNickname,
     createInviteLink,
     revokeInviteLink,

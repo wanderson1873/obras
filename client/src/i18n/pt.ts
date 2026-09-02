@@ -404,6 +404,12 @@ export const pt = {
   "org.failed": "Não foi possível mudar a organização",
   "org.noneYet": "Você ainda não participa de nenhuma organização.",
   "org.createAnother": "Criar outra organização",
+  "org.deleteOrg": "Apagar esta organização",
+  "org.deleteConfirm":
+    "Apagar a {org}? Quem participa perde o acesso, e as fichas dela voltam a ser privadas de quem as criou.",
+  "org.deleted": "Organização apagada",
+  "org.deletedHint": "As fichas voltaram a ser privadas de quem as criou.",
+  "org.deleteFailed": "Não foi possível apagar a organização",
   "org.leave": "Sair desta organização",
   "org.leaveConfirm": "Sair da {org}?",
   "org.leaveBody":

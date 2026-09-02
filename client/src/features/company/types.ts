@@ -18,6 +18,8 @@ export type InviteLink = {
 export type Company = {
   id: string;
   name: string;
+  /** Quem criou. Essa pessoa não sai da organização — só apaga. */
+  createdBy: string;
   /** Papel de quem está usando o app agora. */
   myRole: MemberRole;
   members: CompanyMember[];

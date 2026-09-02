@@ -26,6 +26,7 @@ export function CompanySheet({ onClose }: { onClose: () => void }) {
     companies,
     loading,
     createCompany,
+    deleteCompany,
     addByNickname,
     createInviteLink,
     revokeInviteLink,
@@ -72,6 +73,7 @@ export function CompanySheet({ onClose }: { onClose: () => void }) {
               onRevokeLink={() => revokeInviteLink(empresa.id)}
               onRemoveMember={userId => removeMember(empresa.id, userId)}
               onLeave={() => leave(empresa.id)}
+              onDelete={() => deleteCompany(empresa.id)}
             />
           ))}
 
@@ -96,6 +98,7 @@ function CompanyBlock({
   onRevokeLink,
   onRemoveMember,
   onLeave,
+  onDelete,
 }: {
   company: Company;
   meuId?: string;
@@ -106,9 +109,14 @@ function CompanyBlock({
   onRevokeLink: () => Promise<void>;
   onRemoveMember: (userId: string) => Promise<void>;
   onLeave: () => Promise<void>;
+  onDelete: () => Promise<void>;
 }) {
   const t = useT();
   const souAdmin = company.myRole === "admin";
+  // Quem criou não sai: sairia deixando a organização sem dono.
+  const souCriador = company.createdBy === meuId;
+  const [confirmando, setConfirmando] = useState(false);
+  const [apagando, setApagando] = useState(false);
 
   return (
     <section className="rounded-2xl border border-[#eae4da] bg-white p-4">
@@ -169,12 +177,63 @@ function CompanyBlock({
         </p>
       )}
 
-      <button
-        onClick={() => void onLeave()}
-        className="mt-2 flex h-9 w-full items-center justify-center gap-1.5 rounded-xl text-[12px] font-bold text-[#a8503a] transition active:scale-[0.98]"
-      >
-        <LogOut size={14} /> {t("org.leave")}
-      </button>
+      {souCriador ? (
+        confirmando ? (
+          <div className="mt-2 rounded-xl border border-[#f0cfc6] bg-[#fff6f3] p-3">
+            <p className="mb-2.5 text-[12px] leading-4 text-[#8c4633]">
+              {t("org.deleteConfirm", { org: company.name })}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmando(false)}
+                disabled={apagando}
+                className="h-9 flex-1 rounded-xl border border-[#e2dbd0] bg-white text-[12px] font-bold text-[#4c5a6d] transition active:scale-[0.98]"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                onClick={async () => {
+                  setApagando(true);
+                  try {
+                    await onDelete();
+                  } catch (caught) {
+                    toast.error(
+                      caught instanceof Error
+                        ? caught.message
+                        : t("org.deleteFailed")
+                    );
+                    setApagando(false);
+                    setConfirmando(false);
+                  }
+                }}
+                disabled={apagando}
+                className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#b34d3f] text-[12px] font-bold text-white transition active:scale-[0.98] disabled:opacity-70"
+              >
+                {apagando ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Trash2 size={14} />
+                )}{" "}
+                {t("confirm.delete")}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirmando(true)}
+            className="mt-2 flex h-9 w-full items-center justify-center gap-1.5 rounded-xl text-[12px] font-bold text-[#a8503a] transition active:scale-[0.98]"
+          >
+            <Trash2 size={14} /> {t("org.deleteOrg")}
+          </button>
+        )
+      ) : (
+        <button
+          onClick={() => void onLeave()}
+          className="mt-2 flex h-9 w-full items-center justify-center gap-1.5 rounded-xl text-[12px] font-bold text-[#a8503a] transition active:scale-[0.98]"
+        >
+          <LogOut size={14} /> {t("org.leave")}
+        </button>
+      )}
     </section>
   );
 }

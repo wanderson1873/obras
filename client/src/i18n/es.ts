@@ -388,6 +388,12 @@ export const es: Translations = {
   "org.failed": "No se pudo cambiar la organización",
   "org.noneYet": "Todavía no estás en ninguna organización.",
   "org.createAnother": "Crear otra organización",
+  "org.deleteOrg": "Eliminar esta organización",
+  "org.deleteConfirm":
+    "¿Eliminar {org}? Quienes participan pierden el acceso, y sus obras vuelven a ser privadas de quien las creó.",
+  "org.deleted": "Organización eliminada",
+  "org.deletedHint": "Las obras volvieron a ser privadas de quien las creó.",
+  "org.deleteFailed": "No se pudo eliminar la organización",
   "org.leave": "Salir de esta organización",
   "org.leaveConfirm": "¿Salir de {org}?",
   "org.leaveBody":
