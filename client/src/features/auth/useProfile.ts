@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "./AuthContext";
 import { useT } from "@/i18n/I18nContext";
 
 /** Mesma regra do banco, conferida aqui para o erro chegar antes da viagem. */
@@ -18,14 +19,23 @@ export function isNicknameValid(nickname: string) {
 
 export function useProfile() {
   const t = useT();
+  const { session } = useAuth();
+  const meuId = session?.user.id;
   const [nickname, setNickname] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    if (!meuId) return;
     try {
+      /*
+       * Filtrar pelo meu id é obrigatório, não enfeite: quem participa de uma
+       * organização também enxerga o perfil dos colegas, então sem isso a
+       * consulta volta com várias linhas e o apelido some da tela.
+       */
       const { data, error } = await supabase
         .from("profiles")
         .select("nickname")
+        .eq("user_id", meuId)
         .maybeSingle();
       if (error) throw error;
       setNickname(data?.nickname ?? null);
@@ -34,7 +44,7 @@ export function useProfile() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [meuId]);
 
   useEffect(() => {
     void load();
@@ -46,16 +56,13 @@ export function useProfile() {
       if (!isNicknameValid(limpo))
         throw new Error(t("account.nicknameInvalid"));
 
-      const userId = (await supabase.auth.getUser()).data.user?.id;
-      if (!userId) throw new Error(t("account.expired"));
+      if (!meuId) throw new Error(t("account.expired"));
 
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({
-          user_id: userId,
-          nickname: limpo,
-          updated_at: new Date().toISOString(),
-        });
+      const { error } = await supabase.from("profiles").upsert({
+        user_id: meuId,
+        nickname: limpo,
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) {
         // Índice único no apelido em minúsculas.
@@ -67,7 +74,7 @@ export function useProfile() {
       }
       setNickname(limpo);
     },
-    [t]
+    [t, meuId]
   );
 
   return { nickname, loading, save, refresh: load };
