@@ -12,6 +12,9 @@ import {
   Loader2,
   LogOut,
   Mail,
+  Phone,
+  Trash2,
+  UserRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { BottomSheet } from "@/features/works/components/BottomSheet";
@@ -24,7 +27,7 @@ import {
 } from "@/i18n/I18nContext";
 import { useDates } from "@/i18n/useDates";
 import { useAuth } from "./AuthContext";
-import { useProfile } from "./useProfile";
+import { useProfile, type Profile } from "./useProfile";
 
 export function AccountSheet({
   onClose,
@@ -65,10 +68,11 @@ export function AccountSheet({
           )}
         </div>
 
-        <NicknameField
-          nickname={perfil.nickname}
+        <ProfileCard
+          profile={perfil.profile}
           loading={perfil.loading}
           onSave={perfil.save}
+          onClearPhone={perfil.clearPhone}
         />
 
         {/*
@@ -164,54 +168,117 @@ export function AccountSheet({
   );
 }
 
-/** Apelido: como os colegas encontram a pessoa para adicionar à organização. */
-function NicknameField({
-  nickname,
+/**
+ * Cadastro: nome, apelido e telefone, com edicao no lugar.
+ *
+ * Um formulario so para os quatro campos, em vez de quatro edicoes separadas:
+ * quem abre para trocar o telefone costuma corrigir o nome junto.
+ */
+function ProfileCard({
+  profile,
   loading,
   onSave,
+  onClearPhone,
 }: {
-  nickname: string | null;
+  profile: Profile | null;
   loading: boolean;
-  onSave: (nickname: string) => Promise<void>;
+  onSave: (profile: Partial<Profile>) => Promise<void>;
+  onClearPhone: () => Promise<void>;
 }) {
   const t = useT();
   const [editando, setEditando] = useState(false);
-  const [valor, setValor] = useState("");
+  const [form, setForm] = useState<Profile>({
+    firstName: "",
+    lastName: "",
+    nickname: "",
+    phone: "",
+  });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const set = (campo: keyof Profile, valor: string) =>
+    setForm(atual => ({ ...atual, [campo]: valor }));
+
+  function abrir() {
+    if (profile) setForm(profile);
+    setError(null);
+    setEditando(true);
+  }
 
   async function salvar(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     setBusy(true);
     try {
-      await onSave(valor);
+      await onSave(form);
       setEditando(false);
-      toast.success(t("account.nicknameSaved"));
+      toast.success(t("profile.saved"));
     } catch (caught) {
       setError(
-        caught instanceof Error ? caught.message : t("account.nicknameInvalid")
+        caught instanceof Error ? caught.message : t("profile.saveFailed")
       );
     } finally {
       setBusy(false);
     }
   }
 
+  async function apagarTelefone() {
+    setBusy(true);
+    try {
+      await onClearPhone();
+      setForm(atual => ({ ...atual, phone: "" }));
+      toast.success(t("profile.phoneCleared"));
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : t("profile.saveFailed")
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const nomeCompleto = [profile?.firstName, profile?.lastName]
+    .filter(parte => parte?.trim())
+    .join(" ");
+
   return (
     <div className="rounded-2xl border border-[#e8e2d7] bg-white p-4">
       <p className="flex items-center gap-2 font-mono-field text-[9px] font-medium uppercase tracking-[0.13em] text-[#8a929d]">
-        <AtSign size={13} className="text-[#e86a33]" /> {t("account.nickname")}
+        <UserRound size={13} className="text-[#e86a33]" />{" "}
+        {t("profile.section")}
       </p>
 
       {editando ? (
-        <form onSubmit={salvar} className="mt-2 space-y-2">
-          <input
-            value={valor}
-            onChange={event => setValor(event.target.value)}
-            autoCapitalize="none"
-            autoCorrect="off"
-            className="h-11 w-full rounded-xl border border-[#e4ded3] bg-white px-3 text-sm outline-none transition focus:border-[#e86a33]"
+        <form onSubmit={salvar} className="mt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-2.5">
+            <Entrada
+              label={t("profile.firstName")}
+              value={form.firstName}
+              onChange={valor => set("firstName", valor)}
+            />
+            <Entrada
+              label={t("profile.lastName")}
+              value={form.lastName}
+              onChange={valor => set("lastName", valor)}
+            />
+          </div>
+          <Entrada
+            label={t("account.nickname")}
+            value={form.nickname}
+            lowercase
+            onChange={valor => set("nickname", valor)}
           />
+          <Entrada
+            label={t("profile.phone")}
+            value={form.phone}
+            type="tel"
+            onChange={valor => set("phone", valor)}
+            clearLabel={t("common.delete")}
+            onClear={
+              profile?.phone.trim() ? () => void apagarTelefone() : undefined
+            }
+          />
+
           {error && (
             <p
               role="alert"
@@ -220,6 +287,7 @@ function NicknameField({
               {error}
             </p>
           )}
+
           <div className="flex gap-2">
             <button
               type="button"
@@ -244,27 +312,81 @@ function NicknameField({
           </div>
         </form>
       ) : (
-        <div className="mt-1.5 flex items-center gap-3">
-          <span className="min-w-0 flex-1 truncate text-[15px] font-bold text-[#27374c]">
-            {loading ? "…" : `@${nickname ?? "—"}`}
-          </span>
-          <button
-            onClick={() => {
-              setValor(nickname ?? "");
-              setError(null);
-              setEditando(true);
-            }}
-            className="shrink-0 rounded-xl bg-[#f3f0e9] px-3 py-2 text-[12px] font-bold text-[#4f5c6e] transition active:scale-95"
-          >
-            {t("common.change")}
-          </button>
-        </div>
-      )}
+        <>
+          <div className="mt-1.5 flex items-start gap-3">
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[15px] font-bold text-[#27374c]">
+                {loading ? "..." : nomeCompleto || t("profile.noName")}
+              </span>
+              <span className="mt-0.5 flex items-center gap-1.5 text-[13px] text-[#647084]">
+                <AtSign size={12} className="text-[#b3bac3]" />
+                {loading ? "..." : (profile?.nickname ?? "-")}
+              </span>
+              {profile?.phone.trim() && (
+                <span className="mt-0.5 flex items-center gap-1.5 text-[13px] text-[#647084]">
+                  <Phone size={12} className="text-[#b3bac3]" />
+                  {profile.phone}
+                </span>
+              )}
+            </span>
+            <button
+              onClick={abrir}
+              className="shrink-0 rounded-xl bg-[#f3f0e9] px-3 py-2 text-[12px] font-bold text-[#4f5c6e] transition active:scale-95"
+            >
+              {t("common.change")}
+            </button>
+          </div>
 
-      <p className="mt-2 text-[11px] leading-4 text-[#8a929d]">
-        {t("account.nicknameHint")}
-      </p>
+          <p className="mt-2 text-[11px] leading-4 text-[#8a929d]">
+            {t("account.nicknameHint")}
+          </p>
+        </>
+      )}
     </div>
+  );
+}
+
+function Entrada({
+  label,
+  value,
+  onChange,
+  onClear,
+  clearLabel,
+  type = "text",
+  lowercase = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  /** Presente so quando ha o que apagar; some quando o campo ja esta vazio. */
+  onClear?: () => void;
+  clearLabel?: string;
+  type?: string;
+  lowercase?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 flex items-center justify-between text-[11px] font-bold text-[#526073]">
+        {label}
+        {onClear && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="flex items-center gap-1 text-[10px] font-bold text-[#a8503a]"
+          >
+            <Trash2 size={11} /> {clearLabel}
+          </button>
+        )}
+      </span>
+      <input
+        type={type}
+        value={value}
+        onChange={event => onChange(event.target.value)}
+        autoCapitalize={lowercase ? "none" : "words"}
+        autoCorrect="off"
+        className="h-10 w-full rounded-xl border border-[#e4ded3] bg-white px-3 text-sm outline-none transition focus:border-[#e86a33]"
+      />
+    </label>
   );
 }
 

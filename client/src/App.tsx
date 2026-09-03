@@ -11,6 +11,8 @@ import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { SignInScreen } from "./features/auth/SignInScreen";
 import { useAppUpdate } from "./features/pwa/useAppUpdate";
 import { JoinScreen, takeInviteToken } from "./features/company/JoinScreen";
+import { ProfileSetupScreen } from "./features/auth/ProfileSetupScreen";
+import { useProfile } from "./features/auth/useProfile";
 import Home from "./pages/Home";
 
 function Router() {
@@ -107,6 +109,25 @@ function PendingInvite() {
   }, [navegar]);
 
   if (!conferido) return <Splash />;
+  return <ProfileGate />;
+}
+
+/**
+ * Cadastro antes do app, uma vez só.
+ *
+ * O apelido é como os colegas encontram a pessoa para adicioná-la a uma
+ * organização, então pedir isso na entrada evita alguém trabalhando sem que
+ * ninguém consiga achá-la. Se a consulta falhar — sem internet, por exemplo —
+ * o app abre assim mesmo: ficar preso numa tela de cadastro por falta de rede
+ * seria pior do que um cadastro incompleto.
+ */
+function ProfileGate() {
+  const { profile, complete, loading, failed, save } = useProfile();
+
+  if (loading) return <Splash />;
+  if (!complete && !failed && profile) {
+    return <ProfileSetupScreen initial={profile} onSave={save} />;
+  }
   return <Router />;
 }
 
