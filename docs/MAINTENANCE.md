@@ -143,6 +143,33 @@ a ficha inteira em uma transação. As fotos ficam no bucket privado
 `work-photos`, no caminho `{user_id}/{work_id}/{photo_id}.jpg`, e aparecem na
 tela por link assinado.
 
+### Onde o banco mora
+
+Desde outubro de 2026 o Obras **divide o projeto Supabase com outros projetos
+paralelos** — o projeto se chama `painel-trafego`, e a URL exata está na
+variável `VITE_SUPABASE_URL` do serviço no EasyPanel. Antes o app tinha um
+projeto só para si.
+
+O motivo é o plano gratuito do Supabase, que permite **dois projetos ativos por
+organização**. Com mais projetos que isso, algum fica sempre pausado — e projeto
+pausado não responde a nada. Se o app começar a falhar em tudo que toca o banco,
+o primeiro lugar a olhar é o status do projeto no painel do Supabase, antes de
+suspeitar do schema: pausado e quebrado dão o mesmo sintoma, e o segundo é muito
+mais raro.
+
+Reativar um projeto pausado exige pausar outro antes, o que derruba o app
+daquele. Dentro da janela de 90 dias, projeto pausado no plano gratuito também
+não oferece download de backup — só o botão de religar. E arquivo do Storage
+nunca vem em backup de banco: as fotos saem à parte.
+
+### Convivendo com outros projetos
+
+O schema do Obras compartilha o `public` com as tabelas dos outros projetos,
+então nome virou recurso escasso: antes de levar mais um projeto para este
+banco, confira se as tabelas e funções dele não colidem com as daqui. O
+`auth.users` também é compartilhado, e e-mail é único nele — a mesma pessoa não
+pode ter uma conta por app.
+
 ## Como o código está organizado
 
 ```
