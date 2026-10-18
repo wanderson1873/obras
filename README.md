@@ -1,162 +1,89 @@
-# Obras — Caderno de Campo
+<div align="center">
 
-App mobile para quem trabalha em obra: endereço, código de entrada da portaria,
-o que precisa ser feito e o estado do serviço, tudo em uma ficha só — sem
-precisar caçar a informação na conversa do WhatsApp.
+**🇺🇸 English** · [🇧🇷 Português](README.pt-BR.md)
 
-Instalável na tela inicial do celular (PWA), com login próprio e dados no
-Supabase.
+<a href="https://obras.derson.cloud"><img src="client/public/icon-512.png" alt="Obras app icon" width="120"></a>
 
-## O que ele faz
+# Obras
 
-- Lista de fichas com foto de fachada, endereço, cidade e **código de entrada** em destaque.
-- Botão de rota que abre o Waze, o Google Maps ou o Apple Maps de verdade.
-- Condições do local (água e energia), tarefas, observações, fotos e histórico de atualizações.
-- Abas de obras em andamento e concluídas, com busca por rua, cidade, código ou serviço.
-- Funciona sem sinal em modo somente leitura, usando o que ficou salvo no aparelho.
+**A field notebook for construction jobs: address, entry code, tasks, photos and history in one place, on the phone, even offline.**
 
-## Rodando na sua máquina
+[![Live app](https://img.shields.io/badge/live-obras.derson.cloud-E86A33?style=for-the-badge&logo=googlechrome&logoColor=white)](https://obras.derson.cloud)
+[![Status](https://img.shields.io/badge/status-in%20daily%20use-2F9E63?style=for-the-badge)](https://obras.derson.cloud)
 
-Requer **Node 20.19+** (testado no 24 LTS).
+![React](https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=flat-square&logo=pwa&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+
+[**🌐 Open the app**](https://obras.derson.cloud) · [About](#-about) · [Features](#-features) · [Run locally](#-run-locally)
+
+</div>
+
+---
+
+## 📌 About
+
+On a construction crew, the information for each job lives in a WhatsApp thread: the address, the gate code, what still needs doing, a photo of the front of the house. Finding it again on site, with one hand and a weak signal, wastes time every day.
+
+Obras puts each job on a single card that opens in one tap from the phone's home screen. I built it for my own work in the field and use it every day.
+
+| | |
+|---|---|
+| **Type** | Personal product, used daily in the field |
+| **Audience** | Contractors and crews working on several job sites |
+| **My role** | Product, design, development, database and deploy |
+| **Year** | 2026 |
+| **App** | [obras.derson.cloud](https://obras.derson.cloud) |
+
+## ✨ Features
+
+- **One card per job** with a photo of the front, address, city and the **entry code** highlighted.
+- **Real navigation.** The route button opens Waze, Google Maps or Apple Maps.
+- **Everything about the job:** water and power on site, tasks, notes, photos and a history of updates.
+- **In progress and done tabs**, with search by street, city, code or service.
+- **Works without signal** in read-only mode, using what was saved on the device.
+- **Installable** on the home screen (PWA), with email or Google sign-in.
+- **Private by design.** Row-level security on every table and photos in a private bucket served through signed links.
+
+## 🚀 Run locally
+
+Requires **Node 20.19+** and a Supabase project.
 
 ```bash
 npm install
-cp .env.example .env   # preencha com os dados do seu projeto Supabase
+```
+
+```bash
+cp .env.example .env
+```
+
+Fill `.env` with your Supabase URL and publishable key, then:
+
+```bash
 npm run dev
 ```
 
-O app sobe em `http://localhost:5173`. O `--host` já está ligado, então dá para
-abrir pelo IP da máquina no celular na mesma rede.
+The app runs on `http://localhost:5173`.
 
-> O botão de instalar e o modo offline **só funcionam em HTTPS** (ou em
-> `localhost`). Pelo IP da rede local o navegador trata a página como insegura e
-> não registra o service worker.
+## 🧰 Maintenance
 
-### Scripts
+Environment variables, deploy, Google sign-in setup and the database schema are documented in [docs/MAINTENANCE.md](docs/MAINTENANCE.md) (in Portuguese).
 
-| Comando | O que faz |
-| --- | --- |
-| `npm run dev` | Servidor de desenvolvimento |
-| `npm run build` | Build do app + do servidor Node |
-| `npm run build:client` | Só o app (é o que o Docker usa) |
-| `npm run preview` | Serve o build de produção localmente |
-| `npm run check` | Checagem de tipos |
-| `npm run format` | Prettier |
+---
 
-## Variáveis de ambiente
+<div align="center">
 
-| Variável | Onde achar |
-| --- | --- |
-| `VITE_SUPABASE_URL` | Supabase → Project Settings → Data API → Project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase → Project Settings → API Keys → publishable key |
+**Wanderson Oliveira** · Websites & AI solutions that bring businesses more customers
 
-As duas são **públicas por natureza** — elas vão dentro do JavaScript que roda no
-navegador de qualquer visitante. Quem protege os dados é o RLS no banco, não o
-sigilo da chave. Nunca coloque aqui a `service_role`.
+[![derson.cloud](https://img.shields.io/badge/derson.cloud-2563EB?style=flat-square&logo=googlechrome&logoColor=white)](https://derson.cloud)
+[![Email](https://img.shields.io/badge/Email-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:wanderson1873@gmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/wanderson1873/)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white)](https://wa.me/17816664150)
 
-Em desenvolvimento elas vêm do arquivo `.env`, embutidas pelo Vite.
+<sub>© 2026 Wanderson Oliveira. All rights reserved.</sub>
 
-Em produção **não** são embutidas no build: o container gera um `/config.js` a
-partir das variáveis de ambiente toda vez que sobe, e o app lê dali. Isso existe
-porque o EasyPanel só repassa `GIT_SHA` como build arg — variáveis do painel não
-chegam ao `docker build`. O efeito colateral é bom: trocar de projeto Supabase é
-só mudar a variável e reiniciar, sem recompilar.
-
-## Deploy no EasyPanel
-
-O repositório tem um `Dockerfile` que constrói o app e serve os arquivos com
-nginx. Não há Node em produção.
-
-1. No EasyPanel, crie um **App** apontando para este repositório do GitHub.
-2. Build: **Dockerfile**.
-3. Em **Ambiente**, defina `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`.
-   São lidas quando o container sobe, então basta reiniciar o serviço depois de
-   mudar — não precisa reconstruir a imagem.
-4. Porta do container: **80**.
-5. Em **Domínios**, aponte o domínio e ative o HTTPS (Let's Encrypt). Sem
-   certificado válido o celular não instala o app.
-
-Se as variáveis estiverem faltando, o app sobe assim mesmo e mostra uma tela
-"Configuração ausente" dizendo exatamente o que definir — e o log do container
-avisa na partida.
-
-Cada push na branch principal dispara um novo build.
-
-### Depois do deploy
-
-Abra o domínio no celular. No Android aparece o convite "Instalar o Obras no
-celular"; no iPhone, use Safari → Compartilhar → Adicionar à Tela de Início.
-
-## Entrar com o Google
-
-O botão já está no app. Para ele funcionar, faltam duas configurações que
-dependem das suas contas.
-
-### 1. Google Cloud Console
-
-1. Em [console.cloud.google.com](https://console.cloud.google.com), crie ou
-   selecione um projeto.
-2. **APIs e Serviços → Tela de consentimento OAuth**: tipo **Externo**, nome do
-   app "Obras", seu e-mail em suporte e em contato do desenvolvedor.
-3. Ainda na tela de consentimento, clique em **Publicar app**. Isto importa: no
-   modo "Teste" o Google expira a sessão a cada 7 dias e você teria que entrar de
-   novo toda semana. Como o app só pede nome e e-mail, publicar não exige
-   verificação do Google.
-4. **Credenciais → Criar credenciais → ID do cliente OAuth → Aplicativo da Web**:
-   - Origens JavaScript autorizadas: `https://obras.derson.cloud`
-   - URIs de redirecionamento autorizados:
-     `https://pxujwpvjsnsfpbzzwjhv.supabase.co/auth/v1/callback`
-5. Copie o **ID do cliente** e a **Chave secreta**.
-
-### 2. Supabase
-
-1. **Authentication → Sign In / Providers → Google**: ative e cole o ID do
-   cliente e a chave secreta.
-2. **Authentication → URL Configuration**:
-   - Site URL: `https://obras.derson.cloud`
-   - Redirect URLs: `https://obras.derson.cloud/**` (e
-     `http://localhost:5173/**` para desenvolvimento)
-
-Para conferir se ficou de pé, abra no navegador:
-
-```
-https://pxujwpvjsnsfpbzzwjhv.supabase.co/auth/v1/authorize?provider=google&redirect_to=https%3A%2F%2Fobras.derson.cloud
-```
-
-Enquanto não estiver configurado, isso responde
-`Unsupported provider: provider is not enabled`. Depois, leva para a tela de
-escolher a conta do Google.
-
-Entrar pelo Google e entrar por e-mail com o mesmo endereço caem na mesma conta,
-então as obras são as mesmas nos dois caminhos.
-
-## Banco de dados
-
-O schema está versionado em `supabase/migrations/`. Para recriar em um projeto
-Supabase novo, rode os arquivos em ordem no SQL Editor.
-
-Estrutura: `works` com as filhas `work_tasks`, `work_updates`, `work_history` e
-`work_photos`. Todas com RLS por `auth.uid()`. A função `save_work(jsonb)` grava
-a ficha inteira em uma transação. As fotos ficam no bucket privado
-`work-photos`, no caminho `{user_id}/{work_id}/{photo_id}.jpg`, e aparecem na
-tela por link assinado.
-
-## Como o código está organizado
-
-```
-client/src/
-  features/
-    auth/        sessão e tela de login
-    pwa/         service worker e convite de instalação
-    works/       o app em si
-      components/  telas e folhas
-      data/        repositório (Supabase) e cache local
-      types.ts     modelo de dados
-      useWorks.ts  estado das obras
-  lib/           datas, fotos, rotas de navegação, cliente Supabase
-supabase/migrations/   schema do banco
-```
-
-`features/works/data/repository.ts` é a interface de persistência. Trocar o
-Supabase por outro backend significa escrever outra implementação dela — as
-telas não mudam.
+</div>
