@@ -10,6 +10,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { SignInScreen } from "./features/auth/SignInScreen";
 import { useAppUpdate } from "./features/pwa/useAppUpdate";
+import { isStandaloneDisplay } from "./features/pwa/usePwaInstall";
+import { LandingPage } from "./features/landing/LandingPage";
 import { JoinScreen, takeInviteToken } from "./features/company/JoinScreen";
 import { ProfileSetupScreen } from "./features/auth/ProfileSetupScreen";
 import { useProfile } from "./features/auth/useProfile";
@@ -90,7 +92,24 @@ function AuthenticatedApp() {
   }
 
   if (loading) return <Splash />;
-  if (!session) return <SignInScreen />;
+
+  if (!session) {
+    // Quem pediu a tela de entrada pela landing tem rota própria; qualquer
+    // outro caminho é alguém chegando ao site sem saber o que o app faz.
+    const voltarParaLanding = () => navegar("/", { replace: true });
+    if (local === "/entrar") return <SignInScreen onBack={voltarParaLanding} />;
+    if (local === "/criar-conta")
+      return <SignInScreen initialMode="signUp" onBack={voltarParaLanding} />;
+    // Já instalado na tela inicial: a sessão só caiu, a pessoa conhece o app.
+    if (isStandaloneDisplay()) return <SignInScreen />;
+    return (
+      <LandingPage
+        onSignIn={() => navegar("/entrar")}
+        onCreateAccount={() => navegar("/criar-conta")}
+      />
+    );
+  }
+
   return <PendingInvite />;
 }
 

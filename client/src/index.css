@@ -88,3 +88,36 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ---------------------------------------------------------------------------
+ * Landing (visitante sem sessão).
+ *
+ * As animações são a explicação: quem nunca ouviu falar do app entende pelo
+ * movimento antes de ler. A regra global de prefers-reduced-motion acima
+ * desliga todas elas de uma vez, então cada cena precisa ficar legível parada.
+ * ------------------------------------------------------------------------- */
+@layer utilities {
+  .lp-float { animation: lp-float 3.4s ease-in-out infinite; }
+  .lp-jiggle { animation: lp-jiggle 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .lp-blink { animation: lp-blink 1.6s steps(1, end) infinite; }
+  .lp-pop { animation: lp-pop 2.8s ease-in-out infinite both; transform-box: fill-box; transform-origin: center; }
+  .lp-draw { stroke-dasharray: 150; animation: lp-draw 3.2s ease-in-out infinite; }
+  .lp-check { stroke-dasharray: 22; animation: lp-check 3s ease-in-out infinite both; }
+  .lp-sway { animation: lp-sway 4s ease-in-out infinite; transform-box: fill-box; transform-origin: bottom center; }
+  .lp-fade { animation: lp-fade 3s ease-in-out infinite both; }
+  .lp-rise { animation: lp-rise 600ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+  .lp-d1 { animation-delay: 0.25s; }
+  .lp-d2 { animation-delay: 0.5s; }
+  .lp-d3 { animation-delay: 0.75s; }
+  .lp-d4 { animation-delay: 1s; }
+}
+
+@keyframes lp-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes lp-jiggle { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+@keyframes lp-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0.25; } }
+@keyframes lp-pop { 0%, 12% { opacity: 0; transform: scale(0.6); } 26%, 88% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.6); } }
+@keyframes lp-draw { 0%, 10% { stroke-dashoffset: 150; } 55%, 100% { stroke-dashoffset: 0; } }
+@keyframes lp-check { 0%, 20% { stroke-dashoffset: 22; } 45%, 100% { stroke-dashoffset: 0; } }
+@keyframes lp-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes lp-fade { 0%, 20% { opacity: 0.18; } 50%, 70% { opacity: 1; } 100% { opacity: 0.18; } }
+@keyframes lp-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }

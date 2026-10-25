@@ -58,6 +58,7 @@ export const es: Translations = {
   "auth.passwordPlaceholder": "Tu contraseña",
   "auth.passwordMinPlaceholder": "Mínimo 6 caracteres",
   "auth.signIn": "Entrar",
+  "auth.backHome": "Volver",
   "auth.createAccount": "Crear cuenta",
   "auth.toSignUp": "Todavía no tengo cuenta. Crear",
   "auth.toSignIn": "Ya tengo cuenta. Entrar",
@@ -453,4 +454,47 @@ export const es: Translations = {
   "date.months": "{months} meses de obra",
   "date.oneMonthAndDays": "1 mes y {days} días",
   "date.monthsAndDays": "{months} meses y {days} días",
+
+  // Landing (visitante sin cuenta)
+  "landing.before": "Antes",
+  "landing.after": "Ahora",
+  "landing.hero.title": "Cada obra en una sola ficha.",
+  "landing.hero.body":
+    "Dirección, código del portón y lo que falta hacer — en el bolsillo, incluso sin señal.",
+  "landing.hero.cta": "Crear cuenta gratis",
+  "landing.how.eyebrow": "Cómo funciona",
+  "landing.how.title": "Tres pasos, una sola vez.",
+  "landing.step1.title": "Registra la obra",
+  "landing.step1.body": "Dirección, foto de la fachada y código de entrada.",
+  "landing.step2.title": "Ábrela en el celular",
+  "landing.step2.body": "Un toque en el ícono de la pantalla de inicio.",
+  "landing.step3.title": "Marca lo que hiciste",
+  "landing.step3.body": "Tareas, fotos y notas en la misma ficha.",
+  "landing.feat.eyebrow": "En el día a día",
+  "landing.feat.title": "Lo que haces con ella.",
+  "landing.feat1.title": "Código a la vista",
+  "landing.feat1.body": "El portón abre sin buscar en la conversación.",
+  "landing.feat2.title": "Ruta en un toque",
+  "landing.feat2.body": "Abre Waze, Google Maps o Apple Maps.",
+  "landing.feat3.title": "Toda la obra",
+  "landing.feat3.body": "Tareas, fotos, notas e historial de cambios.",
+  "landing.feat4.title": "Sin señal, funciona",
+  "landing.feat4.body": "Lo que ya se guardó sigue en tu mano.",
+  "landing.team.title": "Con el equipo",
+  "landing.team.body":
+    "Invita a quien trabaja contigo: todos ven la misma ficha.",
+  "landing.privacy.title": "Solo tuyo",
+  "landing.privacy.body":
+    "Fichas y fotos se abren para ti y para tu equipo, nadie más.",
+  "landing.install.eyebrow": "En la pantalla de inicio",
+  "landing.install.title": "Instálala en tres toques.",
+  "landing.android.step1": "En Chrome, toca los tres puntos de la esquina.",
+  "landing.android.step2":
+    "Elige “Instalar app” o “Agregar a la pantalla de inicio”.",
+  "landing.android.step3":
+    "El ícono de Obras aparece en la pantalla de inicio.",
+  "landing.ios.step3":
+    "Confirma en “Agregar” y el ícono aparece en la pantalla.",
+  "landing.final.title": "Empieza ahora, gratis.",
+  "landing.footer.by": "Hecho por Wanderson Oliveira",
 };

@@ -16,7 +16,7 @@ type InstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-function isStandaloneDisplay() {
+export function isStandaloneDisplay() {
   if (typeof window === "undefined") return false;
   const iosStandalone =
     (window.navigator as { standalone?: boolean }).standalone === true;

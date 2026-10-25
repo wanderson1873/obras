@@ -19,7 +19,9 @@ export default defineConfig({
         short_name: "Obras",
         description:
           "Endereço, código de entrada e o que fazer em cada obra, sem procurar conversa.",
-        start_url: "/",
+        // O app instalado abre direto no login: quem instalou já sabe o que o
+        // app faz, e a landing seria um toque a mais todo dia.
+        start_url: "/entrar",
         scope: "/",
         display: "standalone",
         orientation: "portrait",

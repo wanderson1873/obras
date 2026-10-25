@@ -1,9 +1,10 @@
 /** Tela de entrada. Aparece só até existir uma sessão salva no aparelho. */
 
 import { useEffect, useState } from "react";
-import { House, Loader2 } from "lucide-react";
+import { ArrowLeft, House, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/i18n/I18nContext";
+import { LanguagePicker } from "@/i18n/LanguagePicker";
 import type { TranslationKey } from "@/i18n/translations";
 import { useAuth } from "./AuthContext";
 import { GoogleButton } from "./GoogleButton";
@@ -20,12 +21,24 @@ const ERROS: Record<string, TranslationKey> = {
   "Password should be at least 6 characters.": "auth.passwordTooShort",
 };
 
-export function SignInScreen() {
+/**
+ * `initialMode` e `onBack` existem por causa da landing: quem clica em "Criar
+ * conta" lá precisa cair no formulário de cadastro, e quem só foi dar uma
+ * olhada precisa de um caminho de volta. Sem `onBack` — app instalado, sessão
+ * expirada — não há para onde voltar e o botão não aparece.
+ */
+export function SignInScreen({
+  initialMode = "signIn",
+  onBack,
+}: {
+  initialMode?: Mode;
+  onBack?: () => void;
+}) {
   const { signIn, signUp, sendPasswordReset } = useAuth();
   const t = useT();
   const readableError = (message: string) =>
     ERROS[message] ? t(ERROS[message]) : message;
-  const [mode, setMode] = useState<Mode>("signIn");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -105,6 +118,19 @@ export function SignInScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f7f5f0] px-4 text-[#27374c]">
       <div className="app-enter w-full max-w-[400px] rounded-[28px] border border-[#e8e2d7] bg-[#fbfaf7] p-6 shadow-[0_18px_50px_rgba(39,55,76,0.1)]">
+        {onBack && (
+          <div className="mb-5 flex items-center justify-between">
+            <button
+              onClick={onBack}
+              className="-ml-1.5 flex h-9 items-center gap-1 rounded-xl px-1.5 text-[13px] font-bold text-[#6d7889] transition active:scale-95"
+            >
+              <ArrowLeft size={16} />
+              {t("auth.backHome")}
+            </button>
+            <LanguagePicker />
+          </div>
+        )}
+
         <div className="mb-7 flex items-center gap-3">
           <div
             className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-[#e86a33] shadow-[0_7px_15px_rgba(232,106,51,0.25)]"

@@ -114,3 +114,6 @@ client/public/__manus__/version.json
 
 # Configuracao local do Claude Code
 .claude/
+
+# Service worker gerado pelo vite-plugin-pwa ao rodar `npm run dev`
+client/dev-dist/
