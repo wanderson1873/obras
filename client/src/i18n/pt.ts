@@ -242,6 +242,9 @@ export const pt = {
   "form.addressSearchPlaceholder": "Digite o número e a rua",
   "form.searching": "Procurando…",
   "form.noSuggestions": "Nenhum endereço encontrado. Preencha à mão abaixo.",
+  "form.addressOffline": "Sem internet agora. Preencha o endereço à mão abaixo.",
+  "form.addressRetry":
+    "Não deu para buscar agora. Digite mais ou preencha à mão abaixo.",
   "form.unit": "Apartamento",
   "form.unitPlaceholder": "opcional",
   "form.state": "Estado",

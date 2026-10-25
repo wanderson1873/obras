@@ -5,6 +5,11 @@
  * Supabase. Se ela não estiver disponível, o campo some e o formulário segue
  * funcionando na digitação à mão — endereço errado por falta de sugestão é
  * pior do que sugestão nenhuma.
+ *
+ * Só que sumir na primeira falha é demais no celular em obra: ali a conexão
+ * cai o tempo todo. Então sem internet nem se tenta a consulta, uma falha
+ * isolada vira só um aviso, e o campo só desaparece depois de duas falhas
+ * seguidas — que é quando o serviço está realmente fora.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -36,14 +41,28 @@ export function AddressSearch({
   const [texto, setTexto] = useState("");
   const [sugestoes, setSugestoes] = useState<Sugestao[]>([]);
   const [buscando, setBuscando] = useState(false);
-  const [indisponivel, setIndisponivel] = useState(false);
   const [buscouAlgo, setBuscouAlgo] = useState(false);
+  /** Falhas seguidas da função. Na segunda, o campo sai de cena. */
+  const [falhas, setFalhas] = useState(0);
+  const [semRede, setSemRede] = useState(false);
+  const indisponivel = falhas >= 2;
 
   /**
    * O Google cobra a sessão inteira como uma consulta só. O token nasce quando
    * a pessoa começa a digitar e morre quando ela escolhe um endereço.
    */
   const sessao = useRef(crypto.randomUUID());
+
+  // A rede voltando zera o estrago: quem ficou sem sinal no meio da obra
+  // merece as sugestões de volta sem ter que fechar e reabrir o formulário.
+  useEffect(() => {
+    const aoVoltar = () => {
+      setSemRede(false);
+      setFalhas(0);
+    };
+    window.addEventListener("online", aoVoltar);
+    return () => window.removeEventListener("online", aoVoltar);
+  }, []);
 
   useEffect(() => {
     const consulta = texto.trim();
@@ -55,6 +74,14 @@ export function AddressSearch({
 
     let cancelado = false;
     const relogio = setTimeout(async () => {
+      // Offline não é serviço fora do ar: nem tenta, e não conta como falha.
+      if (navigator.onLine === false) {
+        setSemRede(true);
+        setSugestoes([]);
+        setBuscouAlgo(false);
+        return;
+      }
+      setSemRede(false);
       setBuscando(true);
       try {
         const { data, error } = await supabase.functions.invoke(
@@ -71,11 +98,13 @@ export function AddressSearch({
         if (error) throw error;
         setSugestoes(data?.suggestions ?? []);
         setBuscouAlgo(true);
+        setFalhas(0);
       } catch (erro) {
         if (cancelado) return;
         console.warn("Busca de endereço indisponível.", erro);
-        setIndisponivel(true);
+        setFalhas(anteriores => anteriores + 1);
         setSugestoes([]);
+        setBuscouAlgo(false);
       } finally {
         if (!cancelado) setBuscando(false);
       }
@@ -108,8 +137,10 @@ export function AddressSearch({
       // Endereço escolhido encerra a sessão de cobrança; a próxima começa outra.
       sessao.current = crypto.randomUUID();
     } catch (erro) {
+      // O endereço escolhido não veio: avisar e deixar tentar de novo é melhor
+      // do que sumir com a lista no meio do toque da pessoa.
       console.warn("Não foi possível ler o endereço escolhido.", erro);
-      setIndisponivel(true);
+      setFalhas(anteriores => anteriores + 1);
     } finally {
       setBuscando(false);
     }
@@ -172,6 +203,12 @@ export function AddressSearch({
       {buscouAlgo && !buscando && sugestoes.length === 0 && (
         <p className="mt-1.5 text-[11px] leading-4 text-[#8a929d]">
           {t("form.noSuggestions")}
+        </p>
+      )}
+
+      {(semRede || (falhas > 0 && !buscando)) && (
+        <p className="mt-1.5 text-[11px] leading-4 text-[#8a929d]">
+          {semRede ? t("form.addressOffline") : t("form.addressRetry")}
         </p>
       )}
     </div>

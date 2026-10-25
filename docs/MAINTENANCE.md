@@ -44,6 +44,7 @@ abrir pelo IP da máquina no celular na mesma rede.
 | `npm run preview` | Serve o build de produção localmente |
 | `npm run check` | Checagem de tipos |
 | `npm run format` | Prettier |
+| `npm run og` | Regera a imagem de compartilhamento (`client/public/og.png`) |
 
 ## Variáveis de ambiente
 
@@ -131,6 +132,79 @@ escolher a conta do Google.
 
 Entrar pelo Google e entrar por e-mail com o mesmo endereço caem na mesma conta,
 então as obras são as mesmas nos dois caminhos.
+
+## Chaves do Google: busca de endereço e tradução
+
+Duas Edge Functions usam o Google, e cada uma tem a sua chave:
+
+| Função | Segredo | API no Google |
+| --- | --- | --- |
+| `address-lookup` | `GOOGLE_PLACES_API_KEY` | Places API (New) |
+| `translate-work` | `GOOGLE_TRANSLATE_API_KEY` | Cloud Translation API |
+
+São chaves separadas de propósito: cada uma fica restrita à sua própria API,
+então uma chave vazada não dá acesso ao outro serviço. Se a
+`GOOGLE_PLACES_API_KEY` não existir, a busca de endereço cai na chave da
+tradução — funciona, mas perde essa separação.
+
+**Sem o segredo cadastrado, a função responde `503` e o campo de busca de
+endereço não sugere nada.** É assim que o problema aparece no app.
+
+### 1. Pegar a chave no Google Cloud
+
+1. Entre em [console.cloud.google.com](https://console.cloud.google.com) com a
+   conta que já tem o projeto do login com o Google — dá para usar o mesmo
+   projeto, não precisa criar outro.
+2. **APIs e serviços → Biblioteca**, procure e clique em **Ativar** em cada uma:
+   - **Places API (New)** — atenção, é a "(New)"; a antiga não serve, o código
+     chama `places.googleapis.com/v1`;
+   - **Cloud Translation API**.
+3. Faturamento: as duas exigem cartão cadastrado no projeto, mesmo dentro da
+   cota gratuita. Se aparecer "faturamento necessário", resolve-se em
+   **Faturamento → Vincular conta de faturamento**.
+4. **APIs e serviços → Credenciais → Criar credenciais → Chave de API**. Copie a
+   chave que aparece. Repita para ter duas chaves separadas.
+5. Em cada chave, **Editar chave → Restrições de API → Restringir chave** e
+   marque só a API daquela chave. Deixe **Restrições de aplicativo** em
+   "Nenhuma": quem chama é a Edge Function, do servidor, sem navegador nem IP
+   fixo — restringir por site ou por IP derrubaria a chamada.
+
+### 2. Colocar no Supabase
+
+As chaves ficam no projeto que o app usa de verdade, o do `VITE_SUPABASE_URL` do
+`.env` — hoje o **painel-trafego** (`hdrgtapwwdaapurtuily`), não o projeto
+`obras`, que está pausado.
+
+1. Abra [Edge Functions → Secrets](https://supabase.com/dashboard/project/hdrgtapwwdaapurtuily/functions/secrets).
+2. **Add new secret**, uma vez para cada:
+   - nome `GOOGLE_PLACES_API_KEY`, valor = a chave do Places;
+   - nome `GOOGLE_TRANSLATE_API_KEY`, valor = a chave do Translation.
+3. Salve. As funções leem o segredo na chamada seguinte — não precisa publicar
+   de novo nem reiniciar nada.
+
+As chaves ficam só no Supabase. Nunca no `.env` do app nem no repositório: tudo
+que está no `.env` com prefixo `VITE_` viaja junto no JavaScript que o navegador
+baixa.
+
+### 3. Conferir
+
+```bash
+curl -s -X POST "$VITE_SUPABASE_URL/functions/v1/address-lookup" \
+  -H "Authorization: Bearer $VITE_SUPABASE_PUBLISHABLE_KEY" \
+  -H "apikey: $VITE_SUPABASE_PUBLISHABLE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"action":"suggest","query":"1600 Amphitheatre"}'
+```
+
+- `{"error":"Busca de endereço não configurada."}` → o segredo ainda não está lá.
+- `{"suggestions":[…]}` → está de pé; no app, digite três letras no campo de
+  busca e as sugestões aparecem.
+- Mensagem vinda do Google (`API key not valid`, `has not been used in project`)
+  → a chave existe, mas a API não foi ativada ou a restrição está apertada
+  demais.
+
+Se as funções sumirem do projeto (banco recriado, projeto trocado), republique a
+partir de `supabase/functions/` — o código está versionado aqui.
 
 ## Banco de dados
 

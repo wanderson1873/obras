@@ -238,6 +238,9 @@ export const es: Translations = {
   "form.searching": "Buscando…",
   "form.noSuggestions":
     "No se encontró ninguna dirección. Complétala a mano abajo.",
+  "form.addressOffline": "Sin internet ahora. Completa la dirección a mano abajo.",
+  "form.addressRetry":
+    "No se pudo buscar ahora. Sigue escribiendo o complétala a mano abajo.",
   "form.unit": "Apartamento",
   "form.unitPlaceholder": "opcional",
   "form.state": "Estado",

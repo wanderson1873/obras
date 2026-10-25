@@ -235,6 +235,9 @@ export const en: Translations = {
   "form.addressSearchPlaceholder": "Type the number and street",
   "form.searching": "Searching…",
   "form.noSuggestions": "No address found. Fill it in by hand below.",
+  "form.addressOffline": "No connection right now. Fill the address in by hand below.",
+  "form.addressRetry":
+    "Could not search just now. Keep typing or fill it in by hand below.",
   "form.unit": "Apartment",
   "form.unitPlaceholder": "optional",
   "form.state": "State",
