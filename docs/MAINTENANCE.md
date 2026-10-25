@@ -244,6 +244,32 @@ banco, confira se as tabelas e funções dele não colidem com as daqui. O
 `auth.users` também é compartilhado, e e-mail é único nele — a mesma pessoa não
 pode ter uma conta por app.
 
+## Contador de visitas
+
+Para saber quantas pessoas entram no app, o `client/index.html` carrega o
+contador próprio do painel-trafego:
+
+```html
+<script src="https://s.derson.cloud/s.js" data-site="988fd2c41c256f9d" defer></script>
+```
+
+- `data-site` é a chave da linha `Obras` na tabela `sites` do Supabase
+  `painel-trafego` (projeto `hdrgtapwwdaapurtuily`), com domínio
+  `obras.derson.cloud`. O coletor só aceita eventos vindos desse domínio, e
+  recarrega a lista de sites a cada 5 minutos.
+- Não conta em `localhost` nem no `npm run dev`: o `s.js` ignora endereços
+  locais, então os números são só de quem usa o app publicado.
+- O app é uma página só, e o `s.js` já acompanha a troca de rota pelo
+  `pushState` — cada tela conta como uma visita.
+- Nada de IP, nome ou telefone é gravado: o visitante é um código aleatório no
+  `localStorage` do aparelho. Para não contar o seu próprio acesso, abra o app
+  uma vez com `?ptg_ignorar=1` no endereço.
+- Os números aparecem em <https://app.derson.cloud> (o login precisa estar
+  ligado ao site na tabela `membros`).
+- O `index.html` entra no precache do service worker e o aviso de atualização é
+  `prompt`: quem já instalou o app só passa a ser contado depois de aceitar a
+  versão nova.
+
 ## Como o código está organizado
 
 ```
